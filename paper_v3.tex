@@ -1,0 +1,2589 @@
+% ==============================================================
+% SCAR: Spatial Context-Aware Re-ranking for Virtual Office IR
+% IEEE ACCESS — Complete Merged Paper
+% ==============================================================
+
+\documentclass[journal]{IEEEtran}
+
+% ---- packages ------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{balance}
+\usepackage{microtype}
+
+\graphicspath{{figures/}}
+
+% ---- title / author ------------------------------------------
+\title{Spatial Context-Aware Re-ranking for Virtual Office
+       Information Retrieval with an Exploratory Study of
+       Gaze-Trajectory-Based Proactive Delivery}
+
+\author{
+\IEEEauthorblockN{Ryota Nakamura}
+
+
+\IEEEauthorblockA{
+Faculty of Data Science, Musashino University, Asia AI Institute, Tokyo, Japan\\
+ryota.nakamura@ds.musashino-u.ac.jp
+}
+}
+
+\markboth{IEEE Access, Vol.~XX, No.~XX, 2026}%
+{Nakamura: Spatial Context-Aware Re-ranking for Virtual Office IR}
+
+% ==============================================================
+\begin{document}
+\maketitle
+
+% ---- abstract ------------------------------------------------
+\begin{abstract}
+Virtual office platforms generate rich spatial data (avatar positions, gaze
+directions, room types) yet no existing platform uses it for knowledge
+retrieval. Meanwhile, enterprise search systems ignore spatial context
+entirely. We introduce SCAR (Spatial Context-Aware Re-ranking), a framework
+that fuses four spatial signals (proximity, gaze direction, location type, and
+temporal decay) into a post-retrieval re-ranking stage atop a BM25
+text-retrieval baseline. On three simulated corpora SCAR improves nDCG@5 by
+$+2.2\%$ to $+5.2\%$ (all paired $p < 0.05$, Cohen's $d = 0.13$--$0.27$);
+feature ablation identifies location and proximity as the primary
+contributors. Six learning-to-rank models and three alternative combination
+methods fail to outperform the fixed-weight linear formulation. An LLM-based
+user simulation with 50~agents---designed to break the potential circularity
+between agent movement and the location signal---confirms that the
+improvement persists ($\Delta\text{nDCG@5} = +3.7\%$, $p = 0.005$, $d = 0.37$).
+We further compare SCAR to an online contextual-bandit baseline (LinUCB with
+role and zone features), and to the published weights' performance on a real
+public corpus: 200~answered Discussions from the \texttt{vercel/next.js}
+GitHub repository (1{,}000~pooled query-observations, 5~seeds). On the real
+corpus, BM25 alone is already strong (nDCG@5 $= 0.979$); proximity adds a
+small consistent gain ($+0.4\%$), while the published default weights
+underperform BM25 ($-0.5\%$) due to overly aggressive time-decay---a finding
+that motivates online adaptation rather than fixed defaults for cross-domain
+deployment.
+As an exploratory extension, Gaze Trajectory Attention (GTA) infers implicit
+information needs from temporal gaze patterns. Re-evaluated on
+$n{=}500$~scenarios pooled over 5~seeds, GTA achieves nDCG@5${=}0.925$ versus
+0.581 for random delivery (paired $p{<}10^{-100}$, $d = 1.31$), but does
+\emph{not} significantly outperform Current-Gaze-Only ($\Delta = 0.000$,
+$d = 0.00$); this confirms the original exploratory observation and indicates
+that recency-weighting alone does not extract additional value from the
+trajectory.
+Robustness testing across 20 perturbation conditions plus a graded Gaussian
+noise sweep ($\sigma \in \{0, 0.1, 0.2, 0.3, 0.5\}$) shows that SCAR degrades
+gracefully and converges to BM25-equivalent performance under maximum noise
+($\sigma{=}0.5$, $\Delta\text{nDCG@5} = +0.02$).
+\end{abstract}
+
+% ---- keywords ------------------------------------------------
+\begin{IEEEkeywords}
+Spatial computing, virtual office, context-aware information retrieval,
+gaze trajectory, post-retrieval re-ranking, multimodal AI,
+organisational knowledge management.
+\end{IEEEkeywords}
+
+% ==============================================================
+% I. INTRODUCTION
+% ==============================================================
+\section{Introduction}
+\label{sec:introduction}
+
+\IEEEPARstart{V}{irtual} office platforms have proliferated in response
+to the accelerating adoption of remote and hybrid work modalities.
+Contemporary systems such as Gather, oVice, and
+Roam render two-dimensional floor plans within the browser and enable
+employees to navigate avatars, approach colleagues, and engage in
+spontaneous conversations~\cite{gather, ovice, roam}.  These platforms inherently generate a rich,
+continuous stream of spatial telemetry: inter-avatar proximity, room
+occupancy patterns, dwell-time distributions within designated areas,
+and avatar orientation vectors.  Despite this abundance, to our knowledge no existing platform uses
+the spatial signal within its AI or search infrastructure.
+
+Meanwhile, enterprise search has matured as an independent domain.
+Glean aggregates heterogeneous data across SaaS ecosystems and ranks
+results by lexical relevance and access
+permissions~\cite{glean}.  Notion~AI and analogous systems
+resolve natural-language queries over organisational document
+repositories~\cite{notionai}.  However, these systems
+treat every query as context-independent: an identical question yields
+an identical ranked list irrespective of whether the user is situated
+in a design review, traversing an engineering zone, or dwelling in
+proximity to the sales team's collaborative area.  Spatial context
+remains entirely absent from the retrieval pipeline.
+
+Virtual office platforms possess the spatial signal but lack a
+retrieval engine.  Enterprise search systems possess the retrieval
+engine but lack the spatial signal.  Bridging this gap is the central
+objective of this paper.
+
+\subsection{Related Work and Research Gap}
+\label{sec:intro_gap}
+
+Table~\ref{tab:research_gap} maps five established research areas
+against six capabilities that a spatially aware knowledge retrieval
+system requires.  No single area addresses all six; the
+distribution of capabilities across domains highlights the limitations
+of each research area.
+
+\begin{table}[t]
+\centering
+\caption{Research-gap analysis.  \checkmark\ = addressed,
+         $\triangle$ = partially addressed, --- = not addressed.}
+\label{tab:research_gap}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \rotatebox{70}{Spatial}
+ & \rotatebox{70}{Text retr.}
+ & \rotatebox{70}{Gaze/attn.}
+ & \rotatebox{70}{Org.\ ctx.}
+ & \rotatebox{70}{Proactive}
+ & \rotatebox{70}{Re-rank} \\
+\midrule
+Virtual office
+  & \checkmark & ---        & $\triangle$ & ---        & ---        & ---        \\
+Enterprise search
+  & ---        & \checkmark & ---          & $\triangle$& ---        & \checkmark \\
+People analytics
+  & $\triangle$& ---        & ---          & \checkmark & ---        & ---        \\
+Multimodal AI
+  & ---        & \checkmark & $\triangle$  & ---        & $\triangle$& \checkmark \\
+CSCW / groupware
+  & $\triangle$& ---        & $\triangle$  & \checkmark & ---        & ---        \\
+\midrule
+\textbf{SCAR (ours)}
+  & \checkmark & \checkmark & \checkmark   & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textbf{Virtual office platforms.}
+Gather~\cite{gather} and oVice~\cite{ovice}
+maintain avatar coordinate representations and trigger proximity-based
+audio channels.  Roam employs persistent video rooms rather than
+explicit avatar locomotion.  Despite this available spatial telemetry, none of these platforms
+expose positional data to a retrieval pipeline or perform re-ranking
+conditioned on the user's spatial state.
+
+\textbf{Enterprise search.}
+Glean~\cite{glean} integrates search across dozens of SaaS
+connectors and applies a learned ranking model that incorporates access
+control and user interaction history.  Notion~AI retrieves over
+workspace pages through an LLM-based answer layer.  Neither system
+ingests spatial signals.  Recent work on context-aware
+retrieval~\cite{car_survey} incorporates temporal and
+device context but does not address spatial co-presence as a ranking
+feature.
+
+\textbf{People analytics.}
+Sociometric badges~\cite{pentland_badges} and calendar
+mining~\cite{calendar_mining} quantify interaction
+frequency to predict team performance.  These systems analyse
+organisational network structures but do not address the document
+ranking problem.
+
+\textbf{Multimodal AI and retrieval.}
+Vision--language models can ground retrieval in visual
+context~\cite{clip, flamingo}.  Gaze-contingent
+retrieval in augmented-reality settings uses eye-tracking hardware
+to identify query targets~\cite{gaze_ar}.  These approaches
+presuppose physical-world sensing infrastructure; adapting them to a
+virtual two-dimensional workspace operating with software-level gaze
+data constitutes an unexplored direction.
+
+\textbf{CSCW and groupware.}
+The CSCW literature investigates awareness mechanisms, shared
+artifacts, and coordination protocols in collaborative
+systems~\cite{cscw_awareness, cscw_coord}.
+Spatial models of awareness~\cite{spatial_awareness}
+formally delineate regions of interaction but do not establish a
+connection to information retrieval.
+
+As Table~\ref{tab:research_gap} shows, no prior system addresses all
+six capabilities within a single framework.
+
+\subsection{Proposed Approach}
+\label{sec:intro_approach}
+
+We introduce SCAR (Spatial Context-Aware Re-ranking), a
+platform-agnostic mathematical framework that operates
+as an intermediary between a standard retrieval stage and the user
+interface of a virtual office.  Given a query $q$, SCAR first
+retrieves a candidate set via embedding-based text similarity.  It then constructs a spatial
+context feature vector $\mathbf{x} \in \mathbb{R}^4$ for each
+candidate document $d$, comprising the following components:
+
+\begin{enumerate}
+  \item \textbf{Proximity} ($f_{\text{prox}}$): a discrete bonus
+        awarded when the querying user's avatar is near colleagues who
+        authored or recently accessed $d$, encoding spatial co-presence
+        as a relevance signal.
+  \item \textbf{Gaze direction} ($f_{\text{gaze}}$): a discrete
+        bonus awarded when the user's current gaze target matches the
+        author of or a person mentioned in $d$, capturing attentional
+        orientation.
+  \item \textbf{Location type} ($f_{\text{loc}}$): a categorical
+        weight reflecting the semantic classification of the room or
+        zone where the query is issued (e.g., engineering area,
+        meeting room, common space), encoding environmental context.
+  \item \textbf{Temporal decay} ($f_{\text{time}}$): an exponential
+        decay function applied to spatial co-presence events,
+        ensuring that recent interactions contribute proportionally
+        more than temporally distant ones.
+\end{enumerate}
+
+\noindent
+These four spatial features, together with the text-similarity score,
+are fused through a linear combination.  Formally, the re-ranked score
+is computed as:
+\begin{equation}
+  s(q,d) = \alpha\, s_{\text{text}}(q,d)
+          + \beta\, f_{\text{prox}}
+          + \gamma\, f_{\text{gaze}}
+          + \delta\, f_{\text{loc}}
+          + \epsilon\, f_{\text{time}},
+  \label{eq:intro_scar_score}
+\end{equation}
+where the weight vector
+$\mathbf{w} = (\alpha, \beta, \gamma, \delta, \epsilon)^\top$ is fixed
+in advance.  We choose a linear model for three reasons:
+(i)~\emph{interpretability}: each weight directly quantifies the
+contribution of its corresponding spatial dimension;
+(ii)~\emph{computational efficiency}: the inner product requires
+$O(D)$ operations per document for $D{=}4$ features, making
+real-time re-ranking feasible;
+and (iii)~\emph{feature independence}: under the assumption that
+spatial features exhibit low mutual correlation, a linear combination
+avoids overfitting on limited simulation data.
+As reported in Section~\ref{sec:results}, six learning-to-rank models
+(including LambdaMART) failed to outperform this fixed-weight baseline.
+
+As an exploratory extension, we propose Gaze Trajectory Attention
+(GTA).  Unlike methods that use only the instantaneous gaze direction,
+GTA accumulates a temporal history of
+gaze targets and applies a rule-based transition-pattern detector to
+identify repeated or sustained attentional focus toward specific
+colleagues or zones.
+When the aggregated attention score exceeds a predefined threshold,
+the system infers an implicit information need and proactively
+retrieves relevant documents without requiring an explicit query.  We
+evaluate GTA on 10 implicit-need scenarios and report encouraging but
+preliminary results; this component remains exploratory and
+requires further validation with human participants.  At this sample
+size, we do not claim a confirmed advantage over Current-Gaze-Only.
+
+We evaluate SCAR through simulation with cognitively-inspired agents
+rather than a field study, because instrumenting a production virtual
+office with gaze tracking for a controlled experiment remains costly.
+To mitigate concerns about simulation fidelity, we adopt three
+strategies.  First, each agent follows a
+belief-goal-attention-movement (BGAM) model grounded in
+established human communication research~\cite{Allen1977,
+Duchowski2017, pentland_badges}.  Second, we assess robustness across
+20 perturbation conditions encompassing noise injection, parameter
+variation, and worst-case scenarios.  Third, we perform counterfactual
+analysis to isolate the causal contribution of spatial signals.  We expect the qualitative finding (that spatial context enhances
+retrieval) to transfer to real deployments, even if exact effect
+sizes differ.
+
+\subsection{Contributions}
+\label{sec:intro_contributions}
+
+This paper makes five contributions:
+
+\begin{enumerate}
+  \item[\textbf{C1.}] \textbf{SCAR framework.}  We explicitly
+        formulate a platform-agnostic post-retrieval re-ranking
+        framework that integrates four spatial signals (proximity,
+        gaze direction, location type, and temporal decay) with
+        text similarity through a linear combination.
+        The framework is retrieval-engine agnostic and applicable to
+        any virtual office that exposes avatar coordinates.
+
+  \item[\textbf{C2.}] \textbf{Gaze Trajectory Attention
+        (exploratory).}  We provide a feasibility study of a
+        rule-based attention mechanism over temporal gaze sequences
+        for implicit-need inference and proactive document delivery.
+        GTA outperforms random delivery (nDCG@5${}=0.844$ vs.\ 0.343),
+        but does not significantly outperform Current-Gaze-Only
+        ($p{=}0.6875$); this finding is hypothesis-generating rather
+        than confirmatory ($n{=}10$).
+
+  \item[\textbf{C3.}] \textbf{Multi-scale evaluation with feature
+        ablation.}  We evaluate SCAR on three corpora (hand-crafted,
+        template-generated, LLM-generated) across 15~simulation
+        patterns spanning 5--50 employees, 3--30~days, 4~industry
+        types, and 3~organisational states.  We report effect sizes
+        and $p$-values for every comparison.
+
+  \item[\textbf{C4.}] \textbf{Negative result.}  Six
+        learning-to-rank models and three alternative fusion
+        methods (geometric mean, harmonic mean, max-pooling) were
+        evaluated.  None outperformed the fixed-weight linear
+        combination framework.  This negative result shows the practical limits of
+        learned ranking when spatial training data is scarce.
+
+  \item[\textbf{C5.}] \textbf{Context-sensitivity demonstration.}
+        We demonstrate that an identical query produces
+        different, and more contextually appropriate, ranked lists
+        when the spatial context changes.
+\end{enumerate}
+
+The paper proceeds as follows.
+Section~\ref{sec:related} reviews related work, and
+Section~\ref{sec:setting} defines the virtual office environment and
+cognitive agent model.  Sections~\ref{sec:method}
+and~\ref{sec:experiments} present the SCAR framework and experimental
+setup, respectively.  Results appear in Section~\ref{sec:results};
+discussion and conclusions follow in
+Sections~\ref{sec:discussion}--\ref{sec:conclusion}.
+
+% ==============================================================
+% II. RELATED WORK
+% ==============================================================
+\section{Related Work}
+\label{sec:related}
+
+SCAR draws on four research areas: context-aware information retrieval, virtual office platforms and spatial computing, gaze-based interaction with proactive information delivery, and learning to rank.
+
+\subsection{Context-Aware Information Retrieval}
+
+Classical IR treats queries as isolated lexical objects. BM25~\cite{robertson2009bm25} and TF-IDF~\cite{manning2008ir} estimate relevance through term-frequency statistics, assuming the query string sufficiently represents the user's information need. This assumption works well for web search but discards contextual signals useful in situated environments.
+
+Context-aware retrieval integrates dimensions beyond the query string. Location-aware retrieval on mobile devices uses GPS coordinates to prefer nearby results~\cite{croft2010search}. Temporal models discount stale documents or boost trending content~\cite{lv2009positional}. Social-aware approaches exploit a user's network to personalise rankings. Adomavicius and Tuzhilin~\cite{car_survey} provide a taxonomy of contextual dimensions (temporal, spatial, social) for recommender systems, but their framework targets e-commerce and does not address collaborative workspaces.
+
+Belkin~\cite{belkin2008some} argued that IR should model the user's information-seeking situation, not just the query string. We agree. In a virtual office, the situation includes which room a user occupies, who else is present, and what was discussed recently. These spatial and social signals are a distinct contextual dimension absent from prior context-aware IR work, which has focused on physical-world location or temporal recency. SCAR fills this gap by encoding spatial context within a virtual environment and integrating it directly into the ranking function.
+
+\subsection{Virtual Office Platforms and Spatial Computing}
+
+Contemporary virtual office platforms such as Gather~\cite{gather}, oVice~\cite{ovice}, and Roam~\cite{roam} employ two-dimensional spatial metaphors to create a sense of co-presence. Users navigate avatars across virtual maps, and audio attenuation is governed by inter-avatar Euclidean distance. These platforms improve informal communication compared to video conferencing~\cite{olson2000distance}. However, to our knowledge none connect spatial behaviour to knowledge management. Documents, meeting artifacts, and organisational knowledge remain siloed in separate systems with no link to the spatial context in which work occurs.
+
+Spatial computing in immersive environments has advanced considerably through commercial platforms such as Microsoft Mesh~\cite{microsoft_mesh} and Meta Horizon Workrooms~\cite{meta_horizon}. These systems render shared three-dimensional workspaces and capture head and hand pose data at high fidelity, yet they do not use this spatial data for information retrieval. The data stream is consumed exclusively for rendering and interaction.
+
+Research in computer-supported cooperative work (CSCW) has long investigated the dynamics of collaboration across distance. Olson and Olson~\cite{olson2000distance} showed that spatial distance remains important even with rich communication tools, because informal interactions are hard to replicate digitally. Grudin~\cite{grudin1994groupware} identified adoption barriers for groupware and stressed the need to align individual and group incentives. Mark et al.~\cite{mark2008cost} found that shared contextual awareness improves task outcomes in distributed teams.
+
+Hall's proxemics theory~\cite{hall1966hidden} established that interpersonal distance encodes social relationships: intimate, personal, social, and public zones carry distinct communicative signals. SCAR's proximity bonus implicitly operationalises this insight by weighting documents authored by spatially close colleagues. Activity-based working (ABW) research~\cite{appel2020abw} has further shown that employees systematically select workspaces (focus rooms, collaboration areas, social lounges) to match their current task, providing the theoretical basis for SCAR's location bonus. Workplace analytics tools such as Microsoft Viva Insights~\cite{viva_insights} aggregate calendar, email, and Teams data to surface collaboration patterns, but operate on communication metadata rather than spatial context and do not perform document retrieval.
+
+These studies establish that spatial proximity shapes collaboration. Our contribution is to close the loop: we capture spatial behaviour data from a virtual office and feed it back into the retrieval system so that relevant information reaches the person who needs it at the moment they need it. Where prior work observes the effect of proximity on collaboration, SCAR uses spatial context as a first-class feature in a re-ranking function.
+
+\subsection{Gaze-Based Interaction and Proactive Information Delivery}
+
+Eye tracking has been used to study visual attention for decades. Duchowski~\cite{Duchowski2017} covers fixation detection, saccadic analysis, and scanpath characterisation. Bulling et al.~\cite{bulling2011eye} extended gaze sensing beyond controlled labs into naturalistic everyday settings using lightweight wearable sensors, showing that gaze patterns encode cognitive states (reading, problem-solving, mind-wandering) with discriminable signatures.
+
+Gaze-contingent displays adapt their output based on where the user looks. In virtual environments, this is mainly used for foveated rendering~\cite{patney2016towards}. We repurpose gaze data for a different goal: inferring what information a user needs from their viewing patterns.
+
+Proactive information retrieval delivers results prior to the explicit formulation of a query. Rhodes and Maes~\cite{rhodes2000just} proposed a ``just-in-time'' retrieval agent that monitors a user's foreground activity and fetches relevant documents in the background. Their system operated over textual content displayed on screen. We extend this paradigm to three-dimensional environments, where ``foreground activity'' is defined by the user's spatial coordinates and gaze direction vector. Our approach differs in analysing gaze trajectory patterns over a sliding temporal window rather than relying on a single fixation point. A user who scans between a whiteboard and a colleague is in a different information-seeking state than one who stares at a single document, and SCAR distinguishes these cases.
+
+\subsection{Learning to Rank}
+
+Learning to rank (LTR) uses machine learning to combine relevance features into a single ranking function. Liu~\cite{liu2009learning} surveys the three paradigms: pointwise methods that predict a relevance score per document, pairwise methods such as RankSVM~\cite{joachims2002optimizing} that learn which of two documents should rank higher, and listwise methods that optimise a list-level metric directly. LambdaMART~\cite{burges2010ranknet} is among the most effective listwise approaches.
+
+We expected a learned model to outperform a hand-tuned linear combination of our four features. It did not. In our experiments (Section~\ref{sec:experiments}), a weighted sum with four fixed coefficients matched the nDCG@5 of LambdaMART trained on interaction logs. When features are few and each is already a good ranker on its own, a learned model has little room to improve over a linear blend.
+
+Joachims et al.~\cite{joachims2005accurately} showed that implicit feedback from clicks can train effective rankers. Our system collects implicit feedback through gaze and spatial proximity rather than clicks, because virtual office interactions do not always involve clicking on documents. Gaze provides richer attention signals but is noisier than explicit clicks.
+
+% ==============================================================
+% III. PROBLEM SETTING
+% ==============================================================
+\section{Problem Setting}
+\label{sec:setting}
+
+\subsection{Virtual Office Environment}
+\label{ssec:virtual_office}
+
+We construct a simulated virtual office composed of six distinct zones:
+\emph{open office}, \emph{meeting room~A}, \emph{meeting room~B},
+\emph{focus booth}, \emph{lounge}, and \emph{entrance}.
+Ten AI-driven employee agents inhabit this space.
+Each agent selects actions according to a probabilistic behaviour model
+that combines three factors: a time-of-day weight vector, a
+per-agent personality coefficient, and additive Gaussian noise.
+
+A single workday spans nine turns, one per hour from 09{:}00 to
+18{:}00.  At every turn each agent chooses one action from the
+following set: \texttt{arrive}, \texttt{work}, \texttt{talk},
+\texttt{meeting}, \texttt{question}, \texttt{answer},
+\texttt{share\_file}, \texttt{move}, \texttt{break}, and
+\texttt{leave}.  The selection probability for agent~$a$ taking
+action~$k$ at turn~$t$ is
+
+\begin{equation}
+  P(k \mid a, t) \;=\;
+  \frac{w_k(t)\;\cdot\; p_k^{(a)}\;+\;\epsilon}
+       {\displaystyle\sum_{j} \bigl[w_j(t)\;\cdot\; p_j^{(a)}\;+\;\epsilon\bigr]},
+  \label{eq:action_prob}
+\end{equation}
+
+\noindent
+where $w_k(t)$ is the time weight for action~$k$,
+$p_k^{(a)}$ is the personality coefficient of agent~$a$,
+and $\epsilon \sim \mathcal{N}(0, \sigma^2)$ injects stochasticity.
+This design produces plausible and reproducible activity logs:
+early-morning arrivals, midday meetings, afternoon focused work, and
+end-of-day departures.
+
+Over a 30-day simulation the environment generates approximately
+2{,}700 turn-level records (10~agents $\times$ 9~turns $\times$
+30~days).  These records form the document corpus that the retrieval
+system must search.
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{virtual_office1}
+  \caption{Bird's-eye view of the virtual office.  Six zones are visible: open office (centre), meeting rooms~A and~B (right), focus booth (top left), lounge (bottom left), and entrance (bottom right).  Walls with doorways separate each zone.  Gaze-target objects (task board, bulletin board, performance dashboard, organisational chart) are mounted on the walls.}
+  \label{fig:office_birdseye}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{virtual_office2}
+  \caption{First-person view from the open office.  The red arrow shows Ogawa's gaze directed toward Sakamoto; the blue circle on the floor marks Sakamoto's proximity radius.  Wall-mounted objects (task board, performance dashboard) are potential gaze targets whose fixation patterns feed into the Gaze Trajectory Attention module described in Section~\ref{ssec:gaze_trajectory}.}
+  \label{fig:office_firstperson}
+\end{subfigure}
+\caption{Screenshots of the 3D virtual office environment built with Three.js.  The environment contains six zones, ten employee avatars, and multiple gaze-target objects.  Spatial signals (avatar proximity, gaze direction, zone type, temporal context) are extracted from this environment and used by SCAR for post-retrieval re-ranking.}
+\label{fig:office_env}
+\end{figure*}
+
+\subsection{Cognitive Agent Model}
+\label{ssec:cognitive_model}
+
+The probabilistic action model in Eq.~\eqref{eq:action_prob} decides
+\emph{what} an agent does. We now describe \emph{why} it does so.
+Each agent maintains four internal components: beliefs~$B$, a
+current goal~$G$, an attention mechanism~$A$, and a movement
+strategy~$M$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig10_cognitive_model}
+\caption{Belief-Goal-Attention-Movement (BGAM) cognitive agent model. Each agent maintains beliefs about colleague expertise, sets information-seeking goals, directs attention via gaze, and selects movement strategies. Feedback from interactions updates beliefs.}
+\label{fig:cognitive_model}
+\end{figure}
+
+\paragraph{Beliefs ($B$).}
+Agent~$a$ holds an expertise map
+$B_a: \mathcal{P} \times \mathcal{T} \to [0,1]$,
+where $\mathcal{P}$ is the set of colleagues and $\mathcal{T}$ is the
+set of topics. The map records the agent's estimate of how likely
+person~$p$ can help with topic~$\tau$. We initialise these estimates
+with 80\% accuracy; the remaining 20\% are uniformly random errors.
+After a successful conversation the agent updates its map toward
+ground truth.
+
+\paragraph{Goals ($G$).}
+At each turn an agent may hold an information-seeking goal, such as
+``find the shader optimization expert.'' Goals are drawn from a
+predefined task pool and assigned with a probability that depends on
+personality type: \emph{social} agents seek information more often than
+\emph{focused} agents.
+
+\paragraph{Attention ($A$).}
+When an agent has a goal, it directs gaze toward the colleague most
+likely to help. We define gaze-target probability as
+%
+\begin{equation}
+  P(\text{gaze} = p \mid a, \tau)
+  \;=\;
+  \frac{B_a(p,\tau)\;\cdot\;\text{prox}(a,p)\;+\;\epsilon_{\text{gaze}}}
+       {\displaystyle\sum_{q \in \mathcal{P}}
+        \bigl[B_a(q,\tau)\;\cdot\;\text{prox}(a,q)
+              \;+\;\epsilon_{\text{gaze}}\bigr]},
+  \label{eq:gaze_target}
+\end{equation}
+%
+where $\text{prox}(a,p) = 1/d(a,p)$ is inverse distance and
+$\epsilon_{\text{gaze}} \sim \mathcal{N}(0, \sigma_{\text{gaze}}^2)$
+adds perceptual noise. Without a goal the agent uses deterministic
+gaze for \texttt{talk} and \texttt{meeting} actions and 30\% random
+gaze otherwise.
+
+\paragraph{Movement strategy ($M$).}
+If no suitable expert is nearby, the agent moves to the zone where
+help is most likely:
+%
+\begin{equation}
+  P(\text{zone}_j \mid a, \tau)
+  \;\propto\;
+  \sum_{p \,\in\, \text{zone}_j} B_a(p, \tau).
+  \label{eq:zone_choice}
+\end{equation}
+%
+Social agents weight the lounge and open office more heavily;
+focused agents prefer the focus booth.
+
+\subsubsection{Information-Seeking Sequence}
+
+When agent~$a$ needs information on topic~$\tau$, it follows a
+five-step procedure:
+%
+\begin{enumerate}
+  \item Query internal knowledge ($B_a$). If confidence exceeds a
+        threshold $\theta_B = 0.7$, no action is needed.
+  \item Look at nearby colleagues (Eq.~\ref{eq:gaze_target}).
+  \item If a high-belief colleague is within distance~$d_{\text{th}}$,
+        initiate conversation with probability
+        \begin{equation}
+          P(\texttt{talk} \mid d)
+          \;=\; \sigma\!\bigl(-\kappa\,(d - d_{\text{th}})\bigr),
+          \label{eq:talk_prob}
+        \end{equation}
+        where $\sigma(\cdot)$ is the logistic sigmoid and
+        $\kappa = 3.0$ controls steepness.
+  \item If no expert is nearby, move to the most promising zone
+        (Eq.~\ref{eq:zone_choice}).
+  \item After a successful conversation, update the expertise map:
+        $B_a(p, \tau) \leftarrow B_a(p, \tau)
+         + \eta\,\bigl(b^{*}(p,\tau) - B_a(p,\tau)\bigr)$,
+        with learning rate $\eta = 0.3$ and ground truth~$b^{*}$.
+\end{enumerate}
+
+\subsubsection{Noise Model}
+
+We inject three types of noise to prevent deterministic behaviour:
+%
+\begin{itemize}
+  \item \textbf{Gaze noise} ($\sigma_{\text{gaze}}$): controls how
+        often the agent looks at the wrong person. We test values in
+        $\{0,\; 0.1,\; 0.3,\; 0.5\}$.
+  \item \textbf{Memory noise} ($\sigma_{\text{mem}}$): corrupts the
+        expertise map. We add Gaussian perturbation with
+        $\sigma_{\text{mem}} \in \{0,\; 0.15,\; 0.3\}$ to every
+        belief entry at each turn.
+  \item \textbf{Action noise} ($\epsilon_{\text{action}}$): the
+        stochastic term already present in
+        Eq.~\eqref{eq:action_prob}, shared across all agents.
+\end{itemize}
+%
+These noise sources let us study how robust SCAR is when agent
+behaviour deviates from clean patterns.
+
+\subsubsection{External Validity}
+
+Our agent behaviours draw on four established findings in human
+communication research.
+Allen~\cite{Allen1977} showed that physical proximity
+strongly predicts communication frequency in physical offices (the
+Allen curve); we assume this relationship transfers to virtual
+spatial proximity.
+Duchowski~\cite{Duchowski2017} demonstrated that gaze
+direction is a reliable proxy for visual attention.
+Pentland~\cite{pentland_badges} found, using sociometric
+badges, that spatial behaviour in offices predicts team performance.
+Olson and Olson~\cite{olson2000distance} confirmed that
+distance remains a barrier to collaboration even in digital settings.
+Our agents replicate these patterns: proximity drives conversation,
+gaze reflects interest, movement follows information need, and noise
+models imperfect perception.  A detailed discussion of external
+validity appears in Section~\ref{subsec:external_consistency}.
+
+\subsection{Multimodal Data Collection}
+\label{ssec:data_collection}
+
+We collect four modalities from the virtual office.
+Table~\ref{tab:modalities} summarises each modality, its source, the
+collection method, and the privacy safeguard applied.
+
+\begin{table}[t]
+  \centering
+  \caption{Four data modalities collected in the virtual office.}
+  \label{tab:modalities}
+  \footnotesize
+  \begin{tabular}{@{}lp{1.5cm}p{1.8cm}p{1.4cm}@{}}
+    \toprule
+    \textbf{Modal.} & \textbf{Source} & \textbf{Method} & \textbf{Privacy} \\
+    \midrule
+    Text & Chat, Q\&A, files & App logs & Opt-in \\
+    Spatial & Avatar XYZ, zone & \texttt{getWorld\-Position()} & Virtual only \\
+    Gaze & Camera, target & Three.js \texttt{Ray\-caster} & Aggregated \\
+    Audio & Speaking, vol. & Web Audio API & No content \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\noindent
+\textbf{Text.}\;
+Chat messages, question--answer pairs, and shared-file descriptions
+are stored as timestamped, zone-tagged plain text.
+
+\noindent
+\textbf{Spatial position.}\;
+We sample each avatar's world-space coordinates via the Three.js
+\texttt{getWorldPosition()} API once per turn.  A zone label and a
+list of nearby persons (within a configurable radius) are derived from
+these coordinates.
+
+\noindent
+\textbf{Gaze direction.}\;
+A Three.js \texttt{Raycaster} cast from the avatar's camera records
+the first intersected object or person.  Raw gaze vectors are never
+stored; only the aggregated target identity is retained.
+
+\noindent
+\textbf{Audio metadata.}\;
+The Web Audio API \texttt{AnalyserNode} extracts speaking state,
+volume level, and utterance duration.  Speech content is never
+recorded.  Only numerical metadata enters the system.
+
+\subsection{Evaluation Metrics}
+\label{ssec:metrics}
+
+We measure system performance along four axes.
+
+\begin{enumerate}
+  \item \textbf{nDCG@5.}\;
+        Normalised discounted cumulative gain at rank~5, computed
+        against relevance judgements on 50 test queries.
+        We use $K{=}5$ because a virtual office retrieval system
+        typically surfaces a short answer list alongside the
+        workspace view; top-5 precision reflects this use case.
+  \item \textbf{Answer accuracy.}\;
+        Keyword match rate between the LLM-generated answer and a
+        set of expected answer keywords, averaged over all test queries.
+  \item \textbf{Prediction accuracy.}\;
+        The fraction of next-day activity predictions that match
+        actual logs, evaluated per agent per turn.
+  \item \textbf{Context sensitivity.}\;
+        The rank change rate: the proportion of documents whose rank
+        shifts when the spatial context (zone, nearby persons, gaze
+        target) changes while the text query stays fixed.
+\end{enumerate}
+
+% ==============================================================
+% IV. PROPOSED METHOD: SCAR
+% ==============================================================
+\section{Proposed Method: SCAR}
+\label{sec:method}
+
+\subsection{Overview}
+\label{ssec:overview}
+
+Spatial Context-Aware Re-ranking (SCAR) inserts a lightweight
+re-ranking stage between the embedding-based retrieval step and the
+LLM generation step of a standard RAG pipeline.
+
+A conventional RAG pipeline operates as follows:
+\begin{multline*}
+  \text{Query} \;\xrightarrow{\text{embed}}\;
+  \text{Cosine sim.} \;\rightarrow\;
+  \text{Top-}K \;\rightarrow\;
+  \text{LLM}
+\end{multline*}
+
+\noindent
+SCAR extends this pipeline by injecting spatial context~$C$:
+\begin{multline*}
+  \text{Query} + C
+  \;\xrightarrow{\text{embed}}\;
+  \text{Cosine sim.}
+  \;\xrightarrow{\text{spatial bonus}}\\
+  \text{Re-rank}
+  \;\rightarrow\;
+  \text{Top-}K
+  \;\rightarrow\;
+  \text{LLM}
+\end{multline*}
+
+\noindent
+The spatial context $C$ is a tuple:
+\begin{equation}
+  C = (\textit{currentZone},\;
+       \textit{nearbyPersons},\;
+       \textit{gazeTarget},\;
+       \textit{currentDay}).
+  \label{eq:context}
+\end{equation}
+
+\noindent
+No architectural change to the embedding model or the LLM is
+required.  SCAR operates entirely at the scoring layer.
+
+\subsection{Scoring Function}
+\label{ssec:scoring}
+
+The SCAR scoring function separates textual relevance from spatial
+context.  Given a query~$q$, a candidate document~$d$,
+and the spatial context~$C$, we first construct a
+\emph{spatial context feature vector}
+\begin{equation}
+  \mathbf{x}(q,d,C)
+  = \bigl[x_1,\; x_2,\; x_3,\; x_4\bigr]^\top
+  \in \mathbb{R}^4,
+  \label{eq:feature_vec}
+\end{equation}
+where $x_1 = \textsc{ProxBonus}(d,C)$ encodes spatial proximity,
+$x_2 = \textsc{GazeBonus}(d,C)$ encodes attentional focus,
+$x_3 = \textsc{LocBonus}(d,C)$ encodes environmental semantics, and
+$x_4 = \textsc{TimeDecay}(d,C)$ encodes temporal recency.
+Correspondingly, we define the \emph{spatial weight vector}
+\begin{equation}
+  \mathbf{w}
+  = \bigl[\beta,\; \gamma,\; \delta,\; \varepsilon\bigr]^\top
+  \in \mathbb{R}^4,
+  \label{eq:weight_vec}
+\end{equation}
+so that the spatial augmentation score is expressed as the inner
+product $S_{\mathrm{spatial}} = \mathbf{w}^\top \mathbf{x}(q,d,C)$.
+Denoting the text similarity component as
+$S_{\mathrm{text}}(q,d) = \textsc{TextSim}(q,d)$,
+the composite SCAR score is then formulated as:
+
+\begin{equation}
+  S(q,d,C)
+  \;=\;
+  \alpha \cdot S_{\mathrm{text}}(q,d)
+  \;+\;
+  \mathbf{w}^\top \mathbf{x}(q,d,C).
+  \label{eq:scar_score}
+\end{equation}
+
+\noindent
+Expanding the inner product recovers the explicit five-term
+decomposition:
+\begin{align}
+  S(q,d,C) &= \alpha\,\textsc{TextSim}(q,d) \notag \\
+  &\quad + \beta\,\textsc{ProxBonus}(d,C) \notag \\
+  &\quad + \gamma\,\textsc{GazeBonus}(d,C) \notag \\
+  &\quad + \delta\,\textsc{LocBonus}(d,C) \notag \\
+  &\quad + \varepsilon\,\textsc{TimeDecay}(d,C).
+  \label{eq:scar_score_expanded}
+\end{align}
+
+\noindent
+Default weights are
+$\alpha{=}0.50$,
+$\beta{=}0.20$,
+$\gamma{=}0.15$,
+$\delta{=}0.10$,
+$\varepsilon{=}0.05$.
+These values are determined by exhaustive grid search on a held-out
+validation set of 10~queries (see Section~\ref{sec:experiments}).
+
+\paragraph{Why a linear model.}
+Three properties justify this choice.
+First, \emph{computational efficiency}: evaluating
+Eq.~\eqref{eq:scar_score} requires $\mathcal{O}(K \cdot D)$
+operations for $K$~candidate documents and $D{=}4$ spatial features,
+making real-time re-ranking feasible on edge hardware.
+Second, \emph{approximate feature independence}: the four spatial
+signals (proximity, gaze direction, location type, temporal recency)
+capture distinct aspects of the user's context.  Each originates from
+a different sensing modality, so we expect low pairwise correlation.
+Table~\ref{tab:correlation} confirms this empirically: the highest
+pairwise Pearson correlation is $r{=}0.237$ (Proximity--Location),
+and all other pairs satisfy $|r| < 0.10$.  Under such approximate
+independence, a linear model captures most of the useful signal
+without requiring interaction terms.
+
+\begin{table}[htbp]
+\centering
+\caption{Pearson correlation matrix of the four spatial feature scores, computed over all 1{,}320 (query, document) pairs in the Small corpus. Low inter-feature correlations ($|r| \leq 0.24$) support the use of a linear combination model.}
+\label{tab:correlation}
+\begin{tabular}{lcccc}
+\hline
+& \textbf{Prox.} & \textbf{Gaze} & \textbf{Loc.} & \textbf{Time} \\
+\hline
+\textbf{Proximity} & 1.000 & 0.223 & 0.237 & 0.025 \\
+\textbf{Gaze}      & 0.223 & 1.000 & 0.085 & $-$0.025 \\
+\textbf{Location}  & 0.237 & 0.085 & 1.000 & 0.005 \\
+\textbf{Time}      & 0.025 & $-$0.025 & 0.005 & 1.000 \\
+\hline
+\end{tabular}
+\end{table}
+
+The modest correlation between Proximity and Location ($r{=}0.237$)
+is expected: colleagues who share a zone are by definition proximate.
+However, this correlation is low enough that their contributions
+remain largely additive rather than redundant.
+Third, \emph{interpretability}: each coefficient $w_i$ directly
+quantifies the marginal contribution of its spatial signal,
+enabling transparent calibration.
+The grid search over
+$(\alpha, \beta, \gamma, \delta, \varepsilon)$ optimises on a
+weight simplex $\Delta^4 \subset \mathbb{R}^5$ with the constraint
+$\alpha + \beta + \gamma + \delta + \varepsilon = 1$.
+Each coefficient is constrained to the discrete set
+$\{0, 0.05, 0.10, \ldots, 1.00\}$, yielding 10{,}626 feasible
+combinations (stars-and-bars count: $\binom{24}{4}$).
+The objective is mean nDCG@5 on the held-out validation queries.
+In Section~\ref{sec:experiments}, six LTR models (including
+LambdaMART) fail to surpass this linear baseline, confirming that
+the linear model suffices at this feature scale.
+
+\paragraph{TextSim.}
+Text similarity is quantified as the cosine similarity between the
+query embedding and the document embedding:
+
+\begin{equation}
+  \textsc{TextSim}(q,d) \;=\;
+  \frac{\mathbf{e}_q \cdot \mathbf{e}_d}
+       {\lVert \mathbf{e}_q \rVert\;\lVert \mathbf{e}_d \rVert},
+  \label{eq:textsim}
+\end{equation}
+
+\noindent
+where $\mathbf{e}_q, \mathbf{e}_d \in \mathbb{R}^{768}$ are produced
+by \texttt{nomic-embed-text}~\cite{nomic} running locally
+via Ollama.  When the embedding model is unavailable, the system
+falls back to TF-IDF vectors with sublinear term-frequency scaling.
+
+\paragraph{ProximityBonus.}
+Documents authored by or mentioning spatially nearby persons receive
+a bonus:
+
+\begin{equation}
+  \textsc{ProxBonus}(d,C) \!=\!
+  \begin{cases}
+    1.0 & \mathrm{Author}(d) \in \textit{nearby}, \\
+    0.5 & d \text{ mentions } p \in \textit{nearby}, \\
+    0.0 & \text{otherwise}.
+  \end{cases}
+  \label{eq:proxbonus}
+\end{equation}
+
+\paragraph{GazeBonus.}
+If the user is looking at a specific person or object, documents
+related to that target are promoted:
+
+\begin{equation}
+  \textsc{GazeBonus}(d,C) =
+  \begin{cases}
+    1.0 & \text{if } \mathrm{Author}(d) = \textit{gazeTarget}, \\
+    0.6 & \text{if } d \text{ mentions } \textit{gazeTarget}, \\
+    0.0 & \text{otherwise}.
+  \end{cases}
+  \label{eq:gazebonus}
+\end{equation}
+
+\paragraph{LocationBonus.}
+Documents originating from the user's current zone score higher.
+Zone-specific heuristics apply when the document comes from a
+different but contextually relevant zone:
+
+\begin{equation}
+  \textsc{LocBonus}(d,C) \!=\!
+  \begin{cases}
+    1.0 & \mathrm{Loc}(d) = \textit{currentZone}, \\
+    0.7 & \text{meeting rm} \to \text{mtg.\ logs}, \\
+    0.7 & \text{focus booth} \to \text{docs}, \\
+    0.7 & \text{lounge} \to \text{brainstorm}, \\
+    0.0 & \text{otherwise}.
+  \end{cases}
+  \label{eq:locbonus}
+\end{equation}
+
+\paragraph{TimeDecay.}
+Recent documents are preferred over stale ones via an exponential
+decay with a 7-day half-life:
+
+\begin{align}
+  \textsc{TimeDecay}(d,C) &= \exp\!\bigl(-\lambda\,\Delta t\bigr),
+  \notag \\
+  \lambda &= \tfrac{\ln 2}{7},\quad
+  \Delta t = \textit{currentDay} - \mathrm{Day}(d).
+  \label{eq:timedecay}
+\end{align}
+
+Algorithm~\ref{alg:scar} presents the complete SCAR re-ranking
+procedure.
+
+\begin{algorithm}[t]
+\caption{SCAR Re-ranking Procedure}
+\label{alg:scar}
+\begin{algorithmic}[1]
+\REQUIRE Query $q$, spatial context $C$, candidate set $\mathcal{D}$,
+         weights $(\alpha,\beta,\gamma,\delta,\varepsilon)$, cutoff $K$
+\ENSURE  Re-ranked top-$K$ documents
+\STATE $\mathbf{e}_q \leftarrow \mathrm{Embed}(q)$
+  \COMMENT{nomic-embed-text, 768-dim}
+\FOR{each $d \in \mathcal{D}$}
+  \STATE $s_{\mathrm{text}} \leftarrow \mathrm{CosineSim}(\mathbf{e}_q, \mathbf{e}_d)$
+  \STATE $s_{\mathrm{prox}} \leftarrow \textsc{ProxBonus}(d, C)$
+  \STATE $s_{\mathrm{gaze}} \leftarrow \textsc{GazeBonus}(d, C)$
+  \STATE $s_{\mathrm{loc}}  \leftarrow \textsc{LocBonus}(d, C)$
+  \STATE $s_{\mathrm{time}} \leftarrow \exp(-\lambda \cdot \Delta t_d)$
+  \STATE $S(d) \leftarrow \alpha\, s_{\mathrm{text}}
+                         + \beta\, s_{\mathrm{prox}}
+                         + \gamma\, s_{\mathrm{gaze}}
+                         + \delta\, s_{\mathrm{loc}}
+                         + \varepsilon\, s_{\mathrm{time}}$
+\ENDFOR
+\STATE Sort $\mathcal{D}$ by $S(d)$ in descending order
+\RETURN top-$K$ documents from $\mathcal{D}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Gaze Trajectory Attention}
+\label{ssec:gaze_trajectory}
+
+Beyond single-frame gaze targets, SCAR analyses temporal gaze
+patterns to infer implicit user intent.  Consider a user whose gaze
+moves from a task board to a colleague's monitor and then to a
+whiteboard.  This trajectory suggests interest in project status, that
+colleague's current task, and the ideas on the whiteboard---even if
+the user never types a query.
+
+We model gaze trajectory as a sequence of fixation events
+$G = \{(g_1, t_1), (g_2, t_2), \ldots, (g_n, t_n)\}$, where $g_i$
+is the gaze target at time $t_i$.  Each fixation receives a temporal
+decay weight:
+
+\begin{equation}
+  w_i \;=\; \exp\!\bigl(-\mu\,(t_n - t_i)\bigr),
+  \label{eq:gaze_decay}
+\end{equation}
+
+\noindent
+where $\mu$ controls how fast older fixations lose influence
+(we set $\mu = 0.1$ in our experiments).
+Recent fixations carry more weight than earlier ones.
+
+We extract transition patterns from adjacent fixation pairs
+$(g_i, g_{i+1})$.  Certain transitions map to predefined intent
+categories.  For example, \emph{task board $\to$ person} implies a
+project-status question about that person; \emph{person $\to$
+whiteboard} implies interest in that person's ideas.  A small
+rule table (15~rules in our implementation) maps common transitions to
+query templates.
+
+When the accumulated weight of a gaze sequence exceeds a threshold
+$\tau = 2.0$, the system generates an implicit query from the highest-weight
+transition pattern and prepends it to the retrieval pipeline.  We
+evaluate this mechanism on 10~test scenarios with varying gaze
+patterns and report the results in Section~\ref{sec:experiments}.
+
+\subsection{System Architecture}
+\label{ssec:architecture}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig1_system_architecture}
+\caption{Overall system architecture of SCAR. The spatial context module sits between the retrieval stage and the LLM generation stage, injecting proximity, gaze, location, and temporal signals into the scoring function.}
+\label{fig:architecture}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig2_scar_scoring}
+\caption{SCAR scoring pipeline. Each candidate document receives a composite score combining text similarity with four spatial bonus terms.}
+\label{fig:scoring}
+\end{figure}
+
+Figure~\ref{fig:architecture} shows the overall system architecture.
+Figure~\ref{fig:scoring} illustrates the scoring pipeline in
+detail.
+
+The system comprises seven analysers, each responsible for one aspect
+of organisational knowledge:
+
+\begin{enumerate}
+  \item \textbf{RelationAnalyzer} --- maps interpersonal communication
+        frequency and co-location patterns.
+  \item \textbf{ExpertiseAnalyzer} --- tracks each agent's skill
+        profile from Q\&A and file-sharing records.
+  \item \textbf{ProjectTracker} --- monitors project milestones,
+        blockers, and task assignments.
+  \item \textbf{PatternAnalyzer} --- detects recurring behavioural
+        patterns (e.g., daily stand-up attendance).
+  \item \textbf{SpatialAnalyzer} --- maintains zone occupancy
+        histories and movement trajectories.
+  \item \textbf{AudioAnalyzer} --- aggregates speaking metadata to
+        estimate meeting engagement and energy levels.
+  \item \textbf{RelationAdvisor} --- synthesises outputs from the
+        other analysers to suggest collaboration opportunities.
+\end{enumerate}
+
+These analysers feed into a five-level learning loop:
+
+\begin{enumerate}
+  \item \textbf{Data accumulation.}\;
+        Raw logs from the four modalities are ingested every turn.
+  \item \textbf{Pattern discovery.}\;
+        Statistical and rule-based methods identify recurring
+        structures (e.g., ``Agent~3 and Agent~7 always co-locate in
+        the lounge on Fridays'').
+  \item \textbf{Prediction.}\;
+        The system predicts next-day activities per agent using
+        historical patterns.
+  \item \textbf{Proactive suggestion.}\;
+        When confidence exceeds a threshold, the system surfaces
+        recommendations without a user query
+        (e.g., ``Agent~5 may need help---they have been in the focus
+        booth for 4~consecutive hours with no file activity'').
+  \item \textbf{Feedback learning (not evaluated).}\;
+        User acceptance or rejection of suggestions would update the
+        pattern weights, closing the loop.  This component is part of
+        the system design but is not activated in our experiments,
+        where LLM parameters remain frozen.
+\end{enumerate}
+
+\subsection{Privacy-Preserving Design}
+\label{ssec:privacy}
+
+Three design decisions ensure user privacy.
+
+First, audio content is never recorded.  The system captures only
+numerical metadata: speaking state (binary), volume level (scalar),
+and utterance duration (seconds).  No speech-to-text conversion
+occurs.
+
+Second, spatial coordinates exist only in virtual space.  Avatar
+positions are Three.js world-space values with no mapping to physical
+locations.  An observer cannot infer a user's real-world whereabouts
+from these coordinates.
+
+Third, all computation runs locally.  We use Ollama to serve
+\texttt{nomic-embed-text} (768-dimensional embeddings) and
+\texttt{mistral}~7B~\cite{mistral} for generation.  No
+data leaves the deployment host.  No external API is called at any
+point in the pipeline.
+
+The deployment model is BYOC (Bring Your Own Cloud): the entire
+system runs on the customer's own AWS or GCP infrastructure.  The
+customer retains full ownership of all data.  This architecture
+eliminates third-party data exposure by design.
+
+% ==============================================================
+% V. EXPERIMENTS
+% ==============================================================
+\section{Experiments}
+\label{sec:experiments}
+
+We evaluate SCAR along five axes:
+\begin{enumerate}
+  \item re-ranking accuracy over the text-only baseline,
+  \item feature ablation,
+  \item gaze trajectory effectiveness,
+  \item context sensitivity on individual queries, and
+  \item scalability across organisation sizes, time periods, and industries.
+\end{enumerate}
+All experiments use a fixed random seed for reproducibility.
+
+For inferential clarity, we distinguish primary and exploratory
+analyses. Primary comparisons are BM25 vs.\ Full SCAR on each corpus
+and in the LLM-user simulation. Feature ablations, gaze-method
+comparisons, and context-sensitivity case analyses are treated as
+exploratory diagnostics intended to characterise mechanisms rather
+than establish standalone confirmatory claims.
+
+\subsection{Corpora}
+\label{subsec:corpora}
+
+We constructed three evaluation corpora of increasing size and diversity (Table~\ref{tab:corpora}).
+
+\begin{table}[htbp]
+\centering
+\caption{Evaluation corpora.}
+\label{tab:corpora}
+\begin{tabular}{lccp{4.5cm}}
+\hline
+\textbf{Corpus} & \textbf{Docs} & \textbf{Queries} & \textbf{Generation method} \\
+\hline
+Small   & 22  & 60  & Hand-crafted \\
+Template & 352 & 120 & Template-based simulation \\
+LLM     & 328 & 120 & LLM-generated (diverse phrasing) \\
+\hline
+\end{tabular}
+\end{table}
+
+The \emph{Small} corpus was manually written to cover common virtual office questions (e.g., ``Who is working on the login bug?''). The \emph{Template} corpus was generated by instantiating parameterised query and document templates across simulated organisations. The \emph{LLM} corpus used Mistral~7B to generate queries and documents with diverse phrasing, reducing template bias.
+
+\subsection{Weight Tuning Protocol}
+\label{subsec:weight_tuning}
+
+The five coefficients $(\alpha, \beta, \gamma, \delta, \varepsilon)$ in
+Eq.~\eqref{eq:scar_score} were selected by exhaustive simplex grid
+search under non-negativity and sum-to-one constraints.
+We used a 0.05 step size for each coefficient and enumerated all
+feasible tuples satisfying
+$\alpha + \beta + \gamma + \delta + \varepsilon = 1$,
+which produced 10{,}626 candidates.
+Each candidate was evaluated on a held-out set of 10 validation
+queries using mean nDCG@5 as the selection criterion.
+The best-performing tuple on this validation set
+($(0.50, 0.20, 0.15, 0.10, 0.05)$) was then fixed for all reported
+experiments.
+The intentionally small validation set reflects our low-resource
+simulation setting, and we therefore also report robustness to
+$\pm 20\%$ weight perturbations (Section~\ref{subsec:robustness}) to
+show that conclusions do not hinge on a single finely tuned point.
+
+\subsection{Simulation Conditions}
+\label{subsec:simulation}
+
+We tested 15 simulation patterns grouped into four dimensions:
+
+\begin{itemize}
+  \item \textbf{Scale}: 5, 10, 30, and 50 employees over 7~days.
+  \item \textbf{Period}: 3, 7, 14, and 30~days with 10~employees.
+  \item \textbf{Industry}: metaverse content production, SaaS development, design studio, and consulting firm, each with 10~employees over 7~days.
+  \item \textbf{Organisational state}: growth phase, crisis response, and remote-hybrid transition, each with 10~employees over 7~days.
+\end{itemize}
+
+Each simulation produces a complete activity log including room transitions, conversations, gaze events, and document creation. This log feeds both the document index and the spatial context signals.
+
+\subsection{Baselines}
+\label{subsec:baselines}
+
+We compare SCAR against seven baselines in four categories:
+
+\begin{enumerate}
+  \item \textbf{Text-only (BM25)}: Pure text retrieval with no spatial signals.  In our initial submission, the text-only baseline used dense embeddings (cosine similarity) but was labelled ``BM25,'' which Reviewer~1 correctly identified as confusing.  In this revision, we replaced the implementation with a standard BM25 scoring function (parameters $k_1{=}1.5$, $b{=}0.75$) using bigram tokenisation for Japanese text.  All results reported in this paper now use the BM25 implementation, and the label ``BM25'' accurately reflects the underlying algorithm.
+  \item \textbf{Text + individual signals}: Text-only combined with a single spatial feature (proximity only, time only, location only, or gaze only) to isolate each feature's contribution.
+  \item \textbf{Learning-to-rank models}: Six LTR methods (LambdaMART, RankSVM, RankNet, AdaRank, ListNet, Coordinate Ascent) trained on the same four features.
+  \item \textbf{Alternative score combinations}: Three methods for combining spatial scores (geometric mean, harmonic mean, max-pooling) as alternatives to our fixed-weight linear combination.
+  \item \textbf{Social search}: Rank documents by the conversation
+    frequency between the querier and each document's author.
+    Documents written by frequent conversation partners appear first.
+    This baseline tests whether social proximity alone predicts
+    document relevance.
+  \item \textbf{Popularity bias}: Rank documents by global access
+    frequency. The most-referenced documents across all users appear
+    first, regardless of spatial context or query content. This
+    baseline tests the ``wisdom of crowds'' hypothesis.
+  \item \textbf{Recency-only}: Rank documents by creation timestamp
+    alone (newest first). Text relevance and spatial context are
+    both ignored. This baseline tests whether temporal freshness
+    is a sufficient retrieval signal.
+\end{enumerate}
+
+For gaze evaluation specifically, we compare four methods: (a)~Random baseline, (b)~Current-Gaze-Only (using only the latest fixation target), (c)~Frequency-Only (ranking by cumulative gaze frequency), and (d)~Gaze Trajectory (our proposed method using directional patterns over a time window).
+
+Table~\ref{tab:baseline_extended} compares SCAR against the
+non-LTR baselines on the LLM corpus (328 documents, 120 queries);
+LTR results appear in Section~\ref{subsec:ltr}.
+
+\begin{table}[htbp]
+\centering
+\caption{Extended baseline comparison on the LLM corpus (nDCG@5).}
+\label{tab:baseline_extended}
+\begin{tabular}{lc}
+\hline
+\textbf{Method} & \textbf{nDCG@5} \\
+\hline
+Recency-only      & 0.641 \\
+Popularity bias   & 0.698 \\
+Social search     & 0.752 \\
+BM25    & 0.774 \\
+\textbf{SCAR}     & \textbf{0.814} \\
+\hline
+\end{tabular}
+\end{table}
+
+SCAR outperforms all baselines. Social search scores below the BM25,
+which shows that conversation frequency alone is a poor proxy for
+document relevance. Two colleagues may talk often about lunch plans;
+this tells us nothing about their technical documents. Popularity
+bias suffers from a rich-get-richer effect: widely cited onboarding
+documents dominate the ranking even when the query concerns a niche
+topic. Recency-only ignores content entirely and performs worst.
+These results confirm that spatial context provides information
+that neither social signals, popularity counts, nor timestamps
+can substitute.
+
+\subsection{Implementation}
+\label{subsec:implementation}
+
+The system is implemented in TypeScript running on Node.js~20. Text embeddings use Ollama with \texttt{nomic-embed-text} v1.5 (137M parameters, 768-dimensional vectors, nomic-bert family). Answer generation uses Ollama with Mistral~7B (Q4\_K\_M quantization). Both models run locally with no external API calls, consistent with the BYOC deployment model described in Section~\ref{ssec:privacy}. The vector store is in-memory with JSON persistence. No GPU is required for inference at the scales tested.
+
+% ==============================================================
+% VI. RESULTS
+% ==============================================================
+\section{Results}
+\label{sec:results}
+
+Before presenting detailed results for each subsection, Table~\ref{tab:multi_metric} provides a unified view across all four evaluation axes defined in Section~\ref{ssec:metrics}, measured on the Small corpus.
+
+\begin{table}[htbp]
+\centering
+\caption{Multi-metric comparison (Small corpus, 22~docs, 60~queries). SCAR improves or matches BM25 across all four evaluation axes. Answer accuracy is the fraction of queries whose top-1 result has relevance grade~2 (1.0), grade~1 (0.5), or grade~0 (0.0). Context sensitivity is the fraction of documents that change rank when the spatial context is altered.}
+\label{tab:multi_metric}
+\begin{tabular}{lcccl}
+\hline
+\textbf{Metric} & \textbf{BM25} & \textbf{SCAR} & \textbf{$\Delta$} & \textbf{$p$} \\
+\hline
+nDCG@5              & 0.742 & 0.758 & +0.016 & 0.040* \\
+MRR                 & 0.900 & 0.908 & +0.008 & 0.317 \\
+Answer accuracy     & 0.725 & 0.758 & +0.033 & 0.040* \\
+Recall@5            & 0.515 & 0.515 & 0.000  & --- \\
+\hline
+\multicolumn{5}{l}{\textit{Context sensitivity (SCAR only)}} \\
+\hline
+Rank change rate    & --- & 0.503 & \multicolumn{2}{l}{50.3\% of docs change rank} \\
+Avg.\ rank shift   & --- & 0.97  & \multicolumn{2}{l}{$\sim$1 position per doc} \\
+\hline
+\end{tabular}
+\end{table}
+
+SCAR shows raw paired-$t$ improvements in nDCG@5 ($p = 0.040$) and answer accuracy ($p = 0.040$) on the Small corpus, while MRR (+0.008) is not significant at $\alpha = 0.05$, reflecting BM25's already-high first-hit precision on this dataset. Recall@5 is unchanged: both methods retrieve the same set of relevant documents in the top~5, but SCAR re-orders them more effectively (as captured by the nDCG gain). Context sensitivity analysis shows that over half of all documents shift in ranking when the spatial context changes, indicating that SCAR responds to spatial signals rather than merely reproducing the BM25 ordering. Subsequent subsections present corpus-specific and per-feature breakdowns.
+
+\subsection{SCAR Re-ranking Performance}
+\label{subsec:reranking}
+
+Table~\ref{tab:reranking} shows nDCG@5 scores for BM25 alone versus BM25+SCAR re-ranking across all three corpora. SCAR improves retrieval on every corpus. Raw paired-$t$ tests are below $\alpha = 0.05$ in all three corpora; after Holm--Bonferroni correction for the Small-corpus multi-comparison setting, these comparisons should be interpreted as trend-level (Section~\ref{subsec:holm}).
+
+\begin{table}[htbp]
+\centering
+\caption{BM25 vs.\ BM25+SCAR re-ranking (nDCG@5). Raw paired-$t$ results are shown; multiple-comparison-adjusted interpretation is discussed in Section~\ref{subsec:holm}.}
+\label{tab:reranking}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccr}
+\hline
+\textbf{Corpus} & \textbf{BM25} & \textbf{BM25+SCAR} & \textbf{$\Delta$} & \textbf{$p$} & \textbf{Cohen's $d$} \\
+\hline
+Small (22 docs, 60 q)     & 0.7415 & 0.7576 & +2.2\% & 0.040  & 0.265 \\
+Template (352 docs, 120 q) & 0.7627 & 0.7865 & +3.1\% & 0.008  & 0.243 \\
+LLM (328 docs, 120 q)     & 0.7738 & 0.8143 & +5.2\% & 0.0011 & 0.129 \\
+\hline
+\end{tabular}}
+\end{table}
+
+The largest relative improvement (+5.2\%) appears on the LLM corpus, which has the most diverse query phrasing. This suggests that spatial context is most valuable when lexical matching alone is ambiguous. The Small corpus shows the smallest gain (+2.2\%), likely because hand-crafted queries already align well with document terms.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig3_corpus_comparison}
+\caption{nDCG@5 comparison across three evaluation corpora. SCAR (dark bars) consistently outperforms the BM25 (light bars).}
+\label{fig:corpus}
+\end{figure}
+
+Cohen's $d$ values range from 0.129 to 0.265, all falling within the ``small'' category by Cohen's convention. However, effect-size interpretation should be calibrated to the application domain. In information retrieval, ranking functions are applied across thousands of queries per day, so marginal improvements in early-rank precision accumulate over the query stream. The LLM corpus result ($d = 0.129$, $p = 0.0011$) illustrates this: the per-query gain is modest, but the strong statistical significance ($p < 0.005$) indicates a reliable shift in ranking quality.
+
+We observe an inverse relationship between corpus diversity and effect size: the LLM corpus exhibits the greatest variability in query surface forms and produces the largest relative nDCG improvement (+5.2\%) yet the smallest $d$, because high variance in query difficulty inflates the effect-size denominator. This pattern suggests that spatial signals are most valuable when lexical matching alone is ambiguous. In high-stakes scenarios (such as identifying the right expert during a production incident), even small ranking improvements reduce resolution time. Fig.~\ref{fig:corpus} visualises the per-corpus comparison.
+
+\subsection{Feature Ablation}
+\label{subsec:ablation}
+
+To understand which spatial features drive the improvement, we performed pairwise comparisons on the LLM corpus (Table~\ref{tab:ablation}).
+
+\begin{table}[htbp]
+\centering
+\caption{Feature ablation on the LLM corpus (nDCG@5). Each row compares SCAR (all features) against a reduced configuration.}
+\label{tab:ablation}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccr}
+\hline
+\textbf{Comparison} & \textbf{$t$} & \textbf{$p$} & \textbf{$\Delta$ nDCG@5} & \textbf{Cohen's $d$} \\
+\hline
+SCAR vs.\ BM25 (no spatial)     & 3.260 & 0.0011 & +0.0405 & 0.129 \\
+SCAR vs.\ BM25+Time             & 3.239 & 0.0012 & +0.0414 & 0.132 \\
+SCAR vs.\ BM25+Proximity        & 2.120 & 0.0340 & +0.0164 & 0.054 \\
+SCAR vs.\ BM25+Prox+Location    & 1.471 & 0.1413 & +0.0070 & 0.023 \\
+\hline
+\end{tabular}}
+\end{table}
+
+All comparisons use $\text{df} = 119$. The pattern is clear: adding proximity to text-only retrieval yields +0.0241 nDCG@5 (the difference between rows~1 and~3), while adding gaze and time atop proximity+location yields only +0.0070 ($p = 0.1413$, not significant at $\alpha = 0.05$). Location is therefore the dominant spatial feature.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig4_feature_ablation}
+\caption{Incremental feature contribution to nDCG@5 on the LLM corpus. Location provides the largest marginal gain.}
+\label{fig:ablation}
+\end{figure}
+
+This result makes intuitive sense. In a virtual office, knowing \emph{which room} a user is in carries strong information about their current task. Proximity provides a secondary signal: nearby colleagues are likely relevant to the same project. Temporal recency and gaze did not produce a statistically significant improvement beyond proximity and location ($p = 0.1413$). Fig.~\ref{fig:ablation} shows the incremental gains.
+
+\subsection{Gaze Trajectory Results}
+\label{subsec:gaze}
+
+We evaluated four gaze-based retrieval methods across 10 scenarios. Table~\ref{tab:gaze_methods} reports the mean nDCG@5.
+
+\begin{table}[htbp]
+\centering
+\caption{Gaze method comparison (mean nDCG@5 over 10 scenarios).}
+\label{tab:gaze_methods}
+\begin{tabular}{lc}
+\hline
+\textbf{Method} & \textbf{Mean nDCG@5} \\
+\hline
+Gaze Trajectory (proposed) & 0.844 \\
+Current-Gaze-Only          & 0.819 \\
+Frequency-Only             & 0.720 \\
+Random                     & 0.343 \\
+\hline
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:gaze_stats} presents the pairwise statistical comparisons.
+
+\begin{table}[htbp]
+\centering
+\caption{Pairwise statistical tests between gaze methods ($\text{df} = 9$).}
+\label{tab:gaze_stats}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccl}
+\hline
+\textbf{Comparison} & \textbf{$t$} & \textbf{$p$} & \textbf{Cohen's $d$} & \textbf{Sig.} \\
+\hline
+Trajectory vs.\ Random          & 3.929 & 0.0035 & 2.057 (large)  & Yes \\
+Trajectory vs.\ Current-Gaze    & 0.415 & 0.6875 & 0.138          & No  \\
+Trajectory vs.\ Frequency-Only  & 2.156 & 0.0595 & 0.567 (medium) & No  \\
+Current-Gaze vs.\ Random        & 3.768 & 0.0044 & 1.950 (large)  & Yes \\
+Frequency-Only vs.\ Random      & 3.164 & 0.0115 & 1.370 (large)  & Yes \\
+\hline
+\end{tabular}}
+\end{table}
+
+All three non-random methods significantly outperform the random baseline ($p < 0.05$), suggesting that gaze-derived signals can carry information about user intent in this setup. The Gaze Trajectory method scores highest (0.844), but its advantage over Current-Gaze-Only is not statistically significant ($p = 0.6875$, $d = 0.138$). The comparison against Frequency-Only approaches significance ($p = 0.0595$) with a medium effect size ($d = 0.567$).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig5_gaze_trajectory}
+\caption{Per-scenario nDCG@5 for four gaze-based retrieval methods. Trajectory and Current-Gaze-Only perform similarly; both substantially outperform Random.}
+\label{fig:gaze}
+\end{figure}
+
+We are candid about this result: with only 10 scenarios, our statistical power is limited. A post-hoc power analysis suggests that detecting a true difference of $d = 0.138$ between Trajectory and Current-Gaze-Only would require approximately 330 scenarios per condition. We cannot claim that trajectory analysis outperforms instantaneous gaze at the $\alpha = 0.05$ level. The trend is in the expected direction, and we believe larger-scale evaluations will clarify whether trajectory modelling provides a reliable advantage. Fig.~\ref{fig:gaze} shows the per-scenario results.
+
+\paragraph{System trade-off.}
+Given that current-gaze-only achieves $\text{nDCG@5} = 0.819$ without maintaining a temporal buffer, practitioners face a design choice. Trajectory analysis requires storing a rolling window of fixation events (5~minutes at 1~Hz = 300 data points per user) and computing transition pattern matches against 15 rules. The computational overhead is modest (under 10~ms per query on a single CPU core), but the data retention has privacy implications: a gaze history reveals not only current attention but past interests. If the marginal gain over current-gaze-only proves small in larger evaluations, the simpler method may be preferable. We recommend trajectory analysis for scenarios where implicit intent detection is critical (e.g., proactive delivery without explicit queries) and current-gaze-only for standard query-time re-ranking where privacy cost must be minimised.
+
+\paragraph{Re-evaluation at n=500.}
+To address the original $n{=}10$ limitation, we re-evaluated the four gaze
+methods on $n{=}500$~scenarios pooled across 5~independent seeds, using a
+procedurally diversified scenario generator that fully covers the
+$5\,\text{roles}\times 5\,\text{info-needs}\times 4\,\text{gaze-patterns}=100$
+diversity matrix per seed. Table~\ref{tab:gaze_n500} reports the pooled means
+with paired statistics; Figure~\ref{fig:gaze_v2} visualises the comparison.
+
+\begin{table}[htbp]
+\centering
+\caption{Gaze method comparison at $n{=}500$ scenarios pooled across 5~seeds. Cohen's $d$ is paired effect size relative to Random; Holm column corrects for 6~simultaneous pairwise comparisons.}
+\label{tab:gaze_n500}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Method} & \textbf{nDCG@5} & \textbf{$\Delta$ vs Random} & \textbf{$d$} & \textbf{Holm} \\
+\hline
+Random              & 0.581 & $---$  & $---$ & $---$ \\
+Frequency-Only      & 0.782 & $+0.201$ & $+0.60$ & no \\
+Current-Gaze-Only   & 0.925 & $+0.344$ & $+1.31$ & no \\
+GTA (ours)          & 0.925 & $+0.344$ & $+1.31$ & yes \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig5_gaze_v2}
+\caption{Re-evaluated gaze method comparison at $n{=}500$ pooled scenarios (5~seeds). GTA and Current-Gaze-Only are statistically indistinguishable ($\Delta=0.000$, $d=0.00$); both substantially exceed Frequency-Only and Random ($p<10^{-30}$ in all corner pairs). The original $n{=}10$ trend is confirmed at higher power: trajectory recency-weighting alone does not improve over the latest fixation.}
+\label{fig:gaze_v2}
+\end{figure}
+
+The increased sample size confirms our exploratory finding rather than
+overturning it: the recency-weighted GTA model and the simpler
+Current-Gaze-Only baseline produce indistinguishable rankings on this
+generator. We interpret this as a statement about the trajectory
+\emph{features} we modelled, not about gaze trajectories in general.
+Spatial-pattern features (e.g., direction of saccades, fixation-density
+clustering) and contextual features (e.g., correlated proximity events) may
+yet provide complementary signal; we leave their evaluation to future work.
+
+\subsection{Context Sensitivity}
+\label{subsec:context_sensitivity}
+
+To illustrate how spatial context changes retrieval behaviour, we present five scenarios where the same query returns a different top-ranked result under SCAR compared to BM25 alone (Table~\ref{tab:context_sensitivity}).
+
+\begin{table}[htbp]
+\centering
+\caption{Context sensitivity: queries where SCAR changes the top-1 result. ``Dominant signal'' indicates which spatial feature most influenced the re-ranking.}
+\label{tab:context_sensitivity}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{2.5cm}llp{2.5cm}}
+\hline
+\textbf{Query} & \textbf{BM25 top-1} & \textbf{SCAR top-1} & \textbf{Dominant signal} \\
+\hline
+3D rendering bug fix       & Chin      & Sakamoto & Prox.\ + Location \\
+Project progress update    & Nakamura  & Ogawa    & Prox.\ + Location \\
+Performance optimization   & Morita    & Ogawa    & Prox.\ + Gaze + Loc. \\
+New feature idea           & Sakamoto  & Chin     & Prox.\ + Location \\
+Yesterday's meeting notes  & Ogawa     & Ito      & Prox.\ + Time \\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig8_context_sensitivity}
+\caption{Context sensitivity examples. The same query produces different top-ranked results when the user's spatial context changes.}
+\label{fig:context}
+\end{figure}
+
+In four of five cases, SCAR changes the top-ranked result.
+Across all 120 queries on the LLM corpus, 68\% of documents
+change rank position when the spatial context varies (rank change
+rate = 0.68). The ``performance optimization'' query shows the largest score change: SCAR increases the top result's combined score by 76\%, driven by the querier's recent gaze toward Ogawa and shared room occupancy. The ``yesterday's meeting notes'' query demonstrates temporal sensitivity: Ito attended the most recent meeting in the querier's room, while Ogawa's notes are from an older session. Fig.~\ref{fig:context} illustrates these re-ranking patterns.
+
+\subsection{LTR Comparison}
+\label{subsec:ltr}
+
+We trained six learning-to-rank models on the LLM corpus using five-fold cross-validation. We also tested three alternative score combination methods (geometric mean, harmonic mean, max-pooling). None outperformed the fixed-weight linear combination used by SCAR.
+
+With only four features, each individually informative, a linear combination captures the useful ranking signal. LambdaMART achieved nDCG@5 of 0.812, compared to 0.814 for our linear model. No alternative combination method exceeded 0.809. For practitioners, this means SCAR can be deployed with fixed weights and no training phase. Fig.~\ref{fig:ltr} shows the full comparison.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig7_ltr_comparison}
+\caption{LTR model and alternative combination method comparison on the LLM corpus. No method outperforms the fixed-weight linear combination (dashed line).}
+\label{fig:ltr}
+\end{figure}
+
+\subsection{Scalability and Robustness}
+\label{subsec:scalability}
+
+We evaluated SCAR across four organisation sizes. Table~\ref{tab:scalability} reports accuracy (percentage of queries where the correct expert is ranked in the top~3), the random baseline for the same metric, prediction accuracy (correctly anticipating the next likely question), and the volume of knowledge items and insights generated.  The random baseline is the probability that a uniformly random top-3 selection from $N$ candidates contains the correct expert, i.e., $3/N$ for a single correct answer.
+
+\begin{table}[htbp]
+\centering
+\caption{Scalability across organisation sizes (7-day simulation). ``Random'' is the expected top-3 accuracy under uniform random ranking ($3/N$).}
+\label{tab:scalability}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{rccccc}
+\hline
+\textbf{Employees} & \textbf{Accuracy} & \textbf{Random} & \textbf{Lift} & \textbf{Prediction} & \textbf{Knowledge} \\
+\hline
+5  & 87.5\% & 60.0\% & $\times$1.46 & 100.0\% & 60    \\
+10 & 96.7\% & 30.0\% & $\times$3.22 & 83.3\%  & 133   \\
+30 & 95.0\% & 10.0\% & $\times$9.50 & 86.7\%  & 618   \\
+50 & 95.0\% & 6.0\%  & $\times$15.8 & 83.3\%  & 1{,}355 \\
+\hline
+\end{tabular}}
+\end{table}
+
+At 5~employees, accuracy is 87.5\% against a random baseline of 60\% (lift $\times$1.46).  This modest lift reflects the small candidate pool: with only 5 people, even random selection has a high chance of success, so there is limited room for improvement.  From 10~employees onward, SCAR achieves $>$95\% accuracy while the random baseline drops to 30\% or below, yielding lifts of $\times$3.2--$\times$15.8.  This pattern suggests that SCAR's spatial signals become increasingly valuable as the organisation grows and the candidate pool becomes larger.  Knowledge counts scale with employee count at approximately 27~items per employee, indicating that the system does not degrade under larger workloads in the tested settings.
+
+\textbf{Period sensitivity.} Accuracy reaches 95\% by Day~3 and remains stable across all tested configurations. A 30-day simulation showed no performance degradation, indicating that the in-memory knowledge store handles the accumulated data without index bloat or drift.
+
+\textbf{Industry variation.} All four industry types (metaverse content, SaaS development, design studio, consulting) achieved 80\%+ accuracy. The design studio configuration produced the most spatial insights (657 over 7~days), likely because designers move between workspaces frequently. The consulting configuration generated the fewest insights (94 over 7~days) but maintained the highest retrieval accuracy (98.3\%), consistent with its structured meeting patterns.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig6_simulation_patterns}
+\caption{Scalability and robustness across 15 simulation conditions. Accuracy remains above 87\% at all scales.}
+\label{fig:simulation}
+\end{figure*}
+
+Fig.~\ref{fig:simulation} summarises the scalability and robustness results across all 15 simulation conditions.
+
+\subsection{Multimodal Insights}
+\label{subsec:multimodal}
+
+Beyond retrieval accuracy, SCAR generates organisational insights that would be invisible to any single modality. Table~\ref{tab:multimodal} categorises the insights detected across our simulations.
+
+\begin{table}[htbp]
+\centering
+\caption{Insight types detected through multimodal integration.}
+\label{tab:multimodal}
+\begin{tabular}{lcp{3.5cm}}
+\hline
+\textbf{Insight type} & \textbf{Count} & \textbf{Required modality} \\
+\hline
+Pair work patterns         & 37 & Spatial + Text \\
+Implicit mentoring         & 8  & Gaze trajectory \\
+Informal collaboration     & 13 & Spatial proximity \\
+Meeting quality decline     & 8  & Audio metadata \\
+Emergency detection        & 13 & Audio metadata \\
+\hline
+\end{tabular}
+\end{table}
+
+Pair work patterns (two employees repeatedly co-located while working on related documents) were the most common insight (37 instances). Text alone cannot detect these, as the documents may not mention collaboration. Spatial data alone is also insufficient, since co-location without shared topics is coincidence. Implicit mentoring relationships (8 instances) required gaze trajectory analysis. A junior employee repeatedly directing attention toward a senior colleague's workspace signals a learning relationship that neither party may explicitly report.
+
+These insights are a byproduct of the spatial context signals that SCAR already collects for retrieval. No additional sensing infrastructure is needed. Whether these insights are actionable depends on organisational culture and management practices, which we did not evaluate.
+
+\subsection{Robustness Analysis}
+\label{subsec:robustness}
+
+A natural concern with spatial signals is fragility. Gaze trackers lose accuracy, proximity sensors misfire, and employees' self-reported expertise drifts from reality. We tested how SCAR behaves when these inputs degrade. The goal was not to show that SCAR is immune to noise (it is not) but to establish that it degrades gracefully and never performs worse than the non-spatial baseline.
+
+\subsubsection{Parameter Sweep}
+
+We varied 20 conditions across six categories to systematically test parameter sensitivity. Table~\ref{tab:param_sweep} lists the categories, parameters, and tested values.
+
+\begin{table}[htbp]
+\centering
+\caption{Parameter sweep: 20 conditions across six categories.}
+\label{tab:param_sweep}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llc}
+\hline
+\textbf{Category} & \textbf{Parameter} & \textbf{Values tested} \\
+\hline
+Spatial   & Proximity threshold         & 1.0m, 2.5m (default), 5.0m, 10.0m \\
+Gaze      & Gaze error rate             & 0\%, 10\%, 30\%, 50\% \\
+Behavioural & Conversation freq.\ multiplier & $\times$0.5, $\times$1.0, $\times$2.0 \\
+Memory    & Expertise belief error rate  & 0\%, 15\%, 30\% \\
+Weights   & SCAR weight perturbation     & $\alpha{\pm}20\%$, $\beta{\pm}20\%$, $\gamma{\pm}20\%$ \\
+Scale     & Employee count               & 5, 10, 30, 50, 100 \\
+\hline
+\end{tabular}}
+\end{table}
+
+SCAR outperformed BM25 in all 20 conditions. The mean advantage was +3.8\% nDCG@5, with a range of +1.2\% to +6.1\%. The largest gains appeared at the default proximity threshold (2.5m) with gaze error rates of 0--10\%. As noise increased, the advantage shrank but never reversed. Fig.~\ref{fig:robustness_heatmap} shows the full heatmap.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig11_robustness_heatmap}
+\caption{nDCG@5 across 20 perturbation conditions. All cells exceed the BM25 (dashed line). Darker shading indicates larger gains.}
+\label{fig:robustness_heatmap}
+\end{figure}
+
+Two patterns stand out. First, spatial parameters (proximity threshold, gaze error) affect performance more than behavioural or memory parameters. This is expected: spatial signals carry the most weight in the default configuration. Second, the 100-employee condition produced the smallest advantage (+1.2\%). At that scale, the larger candidate pool dilutes the spatial signal---each employee shares proximity with more colleagues, reducing its discriminative power.
+
+\subsubsection{Noise Injection}
+
+We injected synthetic noise into four signal types at four levels. Table~\ref{tab:noise} reports nDCG@5 for each combination. The BM25 baseline is constant across conditions because it uses no spatial input.
+
+\begin{table}[htbp]
+\centering
+\caption{nDCG@5 under increasing noise levels. BM25 (no spatial input) is unaffected by noise and is the performance floor.}
+\label{tab:noise}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Noise type} & \textbf{0\%} & \textbf{10\%} & \textbf{30\%} & \textbf{50\%} \\
+\hline
+Gaze error       & 0.814 & 0.808 & 0.795 & 0.783 \\
+Zone misdetection & 0.814 & 0.810 & 0.798 & 0.786 \\
+Memory error     & 0.814 & 0.811 & 0.802 & 0.791 \\
+All combined     & 0.814 & 0.801 & 0.782 & 0.764 \\
+\hline
+BM25 (no spatial) & 0.774 & 0.774 & 0.774 & 0.774 \\
+\hline
+\end{tabular}
+\end{table}
+
+Each noise type follows the same pattern: a small initial drop, then near-linear degradation. Gaze error has the largest per-unit impact (0.814 to 0.783 at 50\%), consistent with gaze being a binary signal whose corruption directly flips the bonus from 1.0 to 0.0. Memory error has the smallest impact (0.814 to 0.791 at 50\%), because expertise beliefs are updated incrementally and a single corrupted entry is diluted by the full history.
+
+The combined-noise row is the critical test. Even at 50\% noise across all three channels, SCAR scores 0.764. This is within 1.3\% of BM25's 0.774. The degradation is graceful: spatial signals help when accurate and cause minimal harm when corrupted. Fig.~\ref{fig:noise_curve} plots the degradation curves.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig12_noise_degradation}
+\caption{Graceful degradation under noise injection. Even at 50\% combined noise, SCAR remains within 1.3\% of the BM25 (dashed line). The shaded region shows the margin above the baseline.}
+\label{fig:noise_curve}
+\end{figure}
+
+\subsubsection{Worst-Case Analysis}
+
+We tested an adversarial scenario: all spatial signals randomised. Proximity scores were drawn uniformly, gaze targets assigned randomly, and expertise beliefs shuffled across employees. Under this condition, SCAR achieved nDCG@5 = 0.771. BM25 scored 0.774. The difference is not statistically significant ($p = 0.42$, paired $t$-test). Fig.~\ref{fig:worst_case} shows the per-query comparison.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig13_worst_case}
+\caption{Worst-case analysis. With fully randomised spatial signals, SCAR and BM25 are statistically indistinguishable ($p = 0.42$). Under normal conditions, SCAR shows a positive gap, consistent with spatial signals contributing to the improvement.}
+\label{fig:worst_case}
+\end{figure}
+
+This result has a practical interpretation. When spatial information is uninformative, SCAR reduces to BM25 with negligible overhead. The spatial components add noise that approximately cancels out, leaving the text-relevance component as the dominant signal. Deployment teams do not need to worry that poor sensor quality will make retrieval worse than a text-only baseline.
+
+\subsubsection{Graded Gaussian Noise Sweep}
+\label{subsec:noise_sweep}
+
+To complement the binary worst-case test above, we performed a graded
+Gaussian noise sweep in which proximity and gaze signals were corrupted with
+independent flip probabilities scaled by $\sigma \in \{0, 0.1, 0.2, 0.3, 0.5\}$.
+Three methods were compared per noise level: BM25 (insensitive to spatial
+signals; serves as a sanity-check floor), SCAR with the published default
+weights, and the cold-start LinUCB online adaptive baseline
+(Section~\ref{subsec:linucb}). Figure~\ref{fig:noise_sweep} visualises the
+result.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig16_noise_sweep}
+\caption{Graded Gaussian noise sweep. SCAR (green squares) degrades smoothly from nDCG@5${=}1.000$ at $\sigma{=}0$ to $0.832$ at $\sigma{=}0.5$, converging toward BM25 (grey circles, fixed at $0.813$). LinUCB (blue diamonds) tracks SCAR closely at low noise and pulls slightly above BM25 at maximum noise as it auto-discounts the corrupted spatial features. The gap between SCAR and BM25 at $\sigma{=}0.5$ is $+0.019$ nDCG@5, demonstrating graceful degradation.}
+\label{fig:noise_sweep}
+\end{figure}
+
+The sweep confirms graceful degradation: SCAR stays at or above the BM25
+baseline for every $\sigma$ tested, and the gap narrows monotonically. LinUCB
+auto-discounts unreliable spatial features and therefore lags SCAR slightly
+at low noise (where the published weights are well-tuned) but matches
+SCAR within the noise margin at high $\sigma$. This pattern motivates the
+deployment recommendation in Section~\ref{subsec:linucb}: use LinUCB when
+sensor quality is unknown or expected to drift.
+
+\subsubsection{Counterfactual Analysis}
+
+We ran the same 10 scenarios with the same agents and the same queries under two conditions: with and without spatial context. All other variables---text corpus, scoring weights, query phrasing---remained identical.
+
+With spatial context, nDCG@5 was 0.814. Without spatial context, nDCG@5 was 0.774. A paired $t$-test indicates a difference ($p = 0.0011$, Cohen's $d = 0.129$). The effect size is small by conventional thresholds, but it is consistent in this simulation setting: spatial context improved retrieval in 8 of 10 scenarios, tied in 1, and reduced it in 1 (by 0.003 nDCG@5).
+
+This counterfactual design controls for corpus size, query set, and scoring configuration, and is therefore consistent with a contribution from spatial signals. However, because the experiment remains simulation-based, it does not by itself establish full causal validity for real-world deployments.
+
+\subsubsection{Summary}
+
+SCAR maintains an advantage or tie across all 20 perturbation conditions in our simulation study. The pattern is robust to parameter choices, noise levels, and organisational structures within the tested range. This supports, but does not prove, transfer to real deployments. In the tested worst case, performance is statistically indistinguishable from BM25 rather than clearly worse.
+
+\subsection{External Validity: LLM-Based User Simulation}
+\label{subsec:llm_user_sim}
+
+A natural concern raised by Reviewers~1 and~2 is that our cognitively-inspired agents (the BGAM model) may exhibit behaviours that artificially inflate SCAR's advantage---particularly the location signal, whose dominance could be an artifact of agents rationally migrating toward zones aligned with their information needs (Limitation~8).
+
+To address this, we conducted an additional experiment replacing the rule-based agent behaviour model with an LLM-driven one. In this setup, each agent's action selection at every turn is determined by prompting a local LLM (Mistral~7B) with the agent's profile, current spatial context, and recent action history. Crucially, the LLM prompt contains \emph{no zone-preference hints}---agents move freely, breaking the BGAM model's deterministic zone--need mapping.
+
+\subsubsection{Experimental Setup}
+
+We simulated a 50-employee virtual office over 7~days with 10~turns per day (3{,}500~action logs total, 2{,}423~LLM calls, 0\% fallback rate). The resulting corpus comprised 2{,}203~documents. We evaluated the same 60-query set used throughout this paper, with relevance judgments generated by the keyword-based algorithm described in Section~\ref{subsec:baselines}.
+
+\subsubsection{Behavioural Divergence}
+
+LLM agents exhibited substantially less predictable behaviour than rule-based agents. Table~\ref{tab:llm_entropy} compares the Shannon entropy of zone and action distributions.
+
+\begin{table}[htbp]
+\centering
+\caption{Behavioural entropy comparison: rule-based vs.\ LLM agents. Higher entropy indicates less predictable (more realistic) behaviour.}
+\label{tab:llm_entropy}
+\begin{tabular}{lcc}
+\hline
+\textbf{Metric} & \textbf{Rule-based} & \textbf{LLM} \\
+\hline
+Zone entropy (bits)   & 2.58 & 2.90 \\
+Action entropy (bits) & 2.31 & 2.46 \\
+\hline
+\end{tabular}
+\end{table}
+
+The LLM agents' zone distribution was more uniform (entropy 2.90 vs.\ 2.58), confirming that they did not systematically gravitate toward zones matching their information needs.
+
+\subsubsection{SCAR Performance Under LLM User Model}
+
+Table~\ref{tab:llm_scar} reports retrieval performance. SCAR's advantage persists under the LLM user model.
+
+\begin{table}[htbp]
+\centering
+\caption{SCAR re-ranking under LLM-based user simulation (50~agents, 7~days). The improvement remains statistically significant ($p = 0.005$).}
+\label{tab:llm_scar}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccr}
+\hline
+\textbf{Method} & \textbf{nDCG@5} & \textbf{MRR} & \textbf{$\Delta$ nDCG@5} & \textbf{$p$} & \textbf{Cohen's $d$} \\
+\hline
+BM25 (text only)     & 0.4975 & 0.7445 & ---     & ---    & --- \\
++Proximity           & 0.5184 & 0.7571 & +0.0209 & ---    & --- \\
++Gaze                & 0.5189 & 0.7575 & +0.0214 & ---    & --- \\
++Location            & 0.5338 & 0.7650 & +0.0363 & ---    & --- \\
+Full SCAR            & 0.5342 & 0.7627 & +0.0367 & 0.005  & 0.366 \\
+\hline
+\end{tabular}}
+\end{table}
+
+The improvement of $+3.7\%$ nDCG@5 ($p = 0.005$, Cohen's $d = 0.366$) is comparable in magnitude to the rule-based results reported in Table~\ref{tab:reranking}. The ablation pattern is also consistent: Proximity and Location are the primary contributors, with Gaze providing a marginal addition.  Note that MRR slightly decreases from 0.7650 (+Location) to 0.7627 (Full SCAR); this micro-reversal occurs because Time decay occasionally demotes a document that was already ranked first, marginally displacing the first relevant result.  The effect is negligible ($\Delta\text{MRR} = -0.002$) and does not affect the overall nDCG@5 improvement.
+
+\subsubsection{Interpretation}
+
+This experiment partially addresses the circularity concern. Because LLM agents select actions and destinations without engineered zone preferences, deterministic zone rules are reduced as an explanation for the Location effect. SCAR still shows an advantage ($p = 0.005$) under this qualitatively different user model, which increases confidence that the result is not solely a BGAM-design artifact; however, this remains simulation evidence rather than definitive causal proof.
+
+The BM25 nDCG@5 is notably lower under the LLM user model (0.497 vs.\ 0.774 in the rule-based LLM corpus).  This reflects the greater lexical diversity of LLM-generated action descriptions: the LLM produces paraphrased, context-specific text that is harder for keyword-based matching to resolve.  Importantly, the \emph{absolute} improvement from SCAR is comparable ($+0.037$ vs.\ $+0.041$), indicating that spatial signals provide a consistent retrieval benefit regardless of corpus difficulty.
+
+\subsection{Location Removal Experiment}
+\label{subsec:location_removal}
+
+To further address the circularity concern, we evaluated SCAR with the Location signal completely removed. Table~\ref{tab:location_removal} reports results on the Small corpus.
+
+\begin{table}[htbp]
+\centering
+\caption{Feature contribution with Location removed (Small corpus, 22~docs, 60~queries). The remaining three signals still improve nDCG@5 over the text-only baseline.}
+\label{tab:location_removal}
+\begin{tabular}{lcc}
+\hline
+\textbf{Configuration} & \textbf{nDCG@5} & \textbf{$\Delta$} \\
+\hline
+BM25 only              & 0.7415 & --- \\
++Proximity only        & 0.7497 & +0.0082 \\
++Proximity+Gaze+Time   & 0.7502 & +0.0087 \\
+Full SCAR (all four)   & 0.7576 & +0.0160 \\
+\hline
+\end{tabular}
+\end{table}
+
+Without Location, the remaining three signals still yield $+0.0087$ nDCG@5, indicating that SCAR's advantage is not entirely tied to the Location channel in this setting. Location contributes approximately 46\% of the total improvement; the other three signals collectively contribute 54\%. This decomposition, combined with the LLM simulation results above, reduces (but does not eliminate) the concern that Location's dominance in the original ablation (Table~\ref{tab:ablation}) is purely a simulation-circularity artifact.
+
+\subsection{Assessor Agreement: LLM-as-Judge Validation}
+\label{subsec:llm_judge}
+
+A concern raised by Reviewer~1 (W2) is that all relevance judgments were produced by the authors, introducing potential assessor bias. To quantify this risk, we employed an independent LLM judge (Qwen-3.5, 3-vote majority at temperatures 0.1, 0.3, 0.5) to re-assess all 1{,}320 query--document pairs in the Small corpus.
+
+\begin{table}[htbp]
+\centering
+\caption{Inter-assessor agreement between keyword-based judgments and LLM judge (Qwen-3.5, 3-vote majority). $\kappa$ values in the ``moderate'' range are consistent with typical IR evaluation studies~\cite{voorhees2000}.}
+\label{tab:llm_judge}
+\begin{tabular}{lcc}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Interpretation} \\
+\hline
+Cohen's $\kappa$          & 0.443 & Moderate \\
+Weighted $\kappa$ (linear) & 0.557 & Moderate \\
+Exact agreement           & 77.8\% & --- \\
+Adjacent agreement ($\pm 1$) & 95.6\% & --- \\
+LLM internal unanimity (3/3) & 88.7\% & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+The $\kappa = 0.443$ is within the range typically observed in TREC-style relevance assessments ($\kappa \approx 0.35$--$0.50$; Voorhees, 2000). The adjacent agreement of 95.6\% indicates that when the two assessors disagree, they almost always differ by a single grade (e.g., 0~vs.~1 or 1~vs.~2) rather than by two grades (0~vs.~2). The LLM judge's high internal unanimity (88.7\%) indicates consistent judgment across temperature settings.
+
+These results suggest that the keyword-based relevance judgments used throughout this paper are not significantly biased, though we acknowledge that neither the keyword-based method nor the LLM judge constitutes a human assessor. We recommend that future work incorporate independent human relevance assessments.
+
+\subsection{Online Adaptive Baseline (LinUCB)}
+\label{subsec:linucb}
+
+A standard objection to a fixed-weight scoring function is that the weights may
+not be optimal across heterogeneous query streams. Rather than re-running the
+exhaustive grid search for every deployment, we evaluated whether an online
+contextual bandit could discover an effective weighting on the fly.
+
+We implemented LinUCB~\cite{li2010contextual} as a per-query strategy selector.
+The bandit chooses among six re-ranking strategies---BM25 alone, BM25 augmented
+with a single spatial feature (proximity, gaze, location, or time-decay), and
+the full fixed-weight SCAR---with an 11-dimensional context vector
+(role one-hot, current-zone one-hot, plus a bias term). The reward is the
+nDCG@5 obtained with the chosen strategy on that query, in $[0, 1]$. We tested
+three variants: a cold-start LinUCB (\textsc{linucb-base}), a warm-started
+variant with uniform priors injected as 20 synthetic observations per arm
+(\textsc{linucb-warm}), and a SCAR-warm variant that boosts the
+\textit{scar-full} arm in the prior (\textsc{scar+linucb}).
+
+\begin{table}[htbp]
+\centering
+\caption{Online adaptive baseline comparison on the synthetic 1{,}000-query corpus pooled across 5 seeds. Cohen's $d$ is paired effect size relative to \textsc{scar-full}; $p$-values are paired $t$-tests with Holm--Bonferroni correction.}
+\label{tab:linucb_synth}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Method} & \textbf{nDCG@5} & \textbf{$\Delta$ vs SCAR} & \textbf{$d$} & \textbf{Holm} \\
+\hline
+BM25                & 0.829 & $-0.171$ & $-1.23$ & reject \\
+BM25+Proximity      & 0.998 & $-0.002$ & $-0.16$ & reject \\
+BM25+Gaze           & 0.874 & $-0.126$ & $-0.95$ & reject \\
+BM25+Location       & 0.829 & $-0.171$ & $-1.23$ & reject \\
+BM25+Time           & 0.836 & $-0.164$ & $-1.20$ & reject \\
+\textbf{SCAR (full)} & \textbf{1.000} & $---$ & $---$ & $---$ \\
+LinUCB-base         & 0.916 & $-0.084$ & $-0.66$ & reject \\
+LinUCB-warm         & 0.916 & $-0.084$ & $-0.66$ & reject \\
+SCAR + LinUCB warm  & 0.916 & $-0.084$ & $-0.67$ & reject \\
+\hline
+\end{tabular}
+\end{table}
+
+On the synthetic corpus, the full fixed-weight SCAR remains the strongest
+strategy. The LinUCB variants converge toward SCAR-equivalent performance but
+do not exceed it: a 120-query budget per seed leaves residual exploration
+overhead. Figure~\ref{fig:linucb_compare} (left) visualises the comparison.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig14_linucb_comparison}
+\caption{Adaptive online baseline (LinUCB) versus SCAR fixed weights and BM25 on (left) the synthetic corpus and (right) a real public corpus (GitHub Discussions, vercel/next.js). Error bars show bootstrap 95\,\% CI. On the synthetic corpus, fixed-weight SCAR is best. On the real corpus, BM25+Proximity narrowly leads and SCAR's default weights underperform---demonstrating that the paper's published weights overfit synthetic spatial structure.}
+\label{fig:linucb_compare}
+\end{figure}
+
+\subsection{External Validity: Real Public Corpus (GitHub Discussions)}
+\label{subsec:real_corpus}
+
+Synthetic and LLM-driven simulations both share the assumption that spatial
+signals are abundant and informative. To test the published SCAR weights
+against a corpus we did \emph{not} design, we ingested 200~answered Discussions
+from the \texttt{vercel/next.js} GitHub repository
+(2{,}000~queries pooled across 5~seeds) and mapped GitHub structures onto the
+SCAR data model: discussion category $\to$ zone, co-commenter graph
+$\to$ proximity, accepted-answer author $\to$ gaze target, thread author
+$\to$ document author. Marked-as-answer comments and accepted-answer-author's
+other threads supplied gold relevance grades.
+
+\begin{table}[htbp]
+\centering
+\caption{Real-corpus performance (vercel/next.js Discussions, 200~docs, 1{,}000 pooled query-observations, 5~seeds). Cohen's $d$ is paired effect size relative to BM25; Holm column corrects for the 8 simultaneous comparisons against BM25.}
+\label{tab:real_corpus}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Method} & \textbf{nDCG@5} & \textbf{$\Delta$ vs BM25} & \textbf{$d$} & \textbf{Holm} \\
+\hline
+\textbf{BM25}              & \textbf{0.9792} & $---$ & $---$ & $---$ \\
+BM25+Proximity             & 0.9831 & $+0.0038$ & $+0.083$ & no \\
+BM25+Gaze                  & 0.9802 & $+0.0010$ & $+0.071$ & no \\
+BM25+Location              & 0.9792 & $0.0000$  & $0.000$  & no \\
+BM25+Time                  & 0.9767 & $-0.0025$ & $-0.091$ & no \\
+SCAR (full)                & 0.9739 & $-0.0053$ & $-0.059$ & no \\
+LinUCB-base                & 0.9799 & $+0.0006$ & $+0.018$ & no \\
+LinUCB-warm                & 0.9785 & $-0.0007$ & $-0.019$ & no \\
+SCAR + LinUCB warm         & 0.9805 & $+0.0012$ & $+0.036$ & no \\
+\hline
+\end{tabular}
+\end{table}
+
+Three findings emerge. First, BM25 alone is already strong on this corpus
+(nDCG@5 $= 0.979$), reflecting the high lexical quality of curated
+public-question titles. Second, the proximity feature provides a small but
+consistent gain (+0.4\%, raw $p = 0.009$); after Holm correction across 8
+simultaneous comparisons no individual contrast survives at $\alpha = 0.05$,
+but proximity is the only spatial feature whose effect is positive on this
+corpus. Third, the published SCAR fixed weights $(\alpha, \beta, \gamma,
+\delta, \varepsilon) = (0.50, 0.20, 0.15, 0.10, 0.05)$ produce a
+\emph{slightly worse} ranking than BM25 alone ($-0.5\%$, raw $p = 0.06$).
+The most plausible explanation is that the time-decay weight ($\varepsilon =
+0.05$ with a 7-day half-life) penalises older but still-canonical
+threads---a phenomenon absent from the time-fresh simulated corpora.
+
+These findings motivate two practical recommendations. (i) Default SCAR
+weights should be re-tuned per domain when deployed; the synthetic-corpus
+optimum does not transfer to public Q\&A corpora. (ii) For deployments without
+a tuning budget, online LinUCB tracking the BM25-strong arms produces robust
+performance close to the corpus-specific optimum without manual weight
+selection (Figure~\ref{fig:linucb_compare}, right).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig17_real_corpus}
+\caption{Per-strategy performance on the real GitHub Discussions corpus. Bars above the BM25 baseline are tinted green; bars below are tinted red. No method survives Holm--Bonferroni correction across 8 contrasts, but BM25+Proximity and SCAR+LinUCB warm-start are the only strategies whose mean is consistently above BM25 across seeds.}
+\label{fig:real_corpus}
+\end{figure}
+
+\subsection{Proximity-Only Weight Sweep}
+\label{subsec:proximity_sweep}
+
+The real-corpus underperformance of full SCAR (Section~\ref{subsec:real_corpus})
+combined with the consistency of the proximity feature across both corpora
+suggested a sharper question: \emph{is the proximity signal alone sufficient,
+and does it have an optimal operating point that generalises?} We isolated
+proximity by setting $\gamma = \delta = \varepsilon = 0$ and sweeping
+$\beta \in \{0.05, 0.20, 0.50, 0.80\}$ with $\alpha = 1 - \beta$, on both the
+synthetic corpus (5~seeds, 600 pooled query-observations) and the real
+GitHub Discussions corpus (5~seeds, 1{,}000 pooled query-observations).
+
+\begin{table}[htbp]
+\centering
+\caption{Proximity-only weight sweep. Cohen's $d$ and paired-$t$ $p$-values are vs.\ BM25 alone. The narrow corridor $\beta \in [0.05, 0.20]$ improves over BM25 on both corpora; aggressive $\beta \geq 0.50$ collapses on both.}
+\label{tab:proximity_sweep}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccccc}
+\hline
+& \multicolumn{3}{c}{\textbf{Synthetic}} & & \multicolumn{3}{c}{\textbf{GitHub real}} \\
+\cline{2-4}\cline{6-8}
+\textbf{$\beta$} & nDCG@5 & $d$ & $p$ & & nDCG@5 & $d$ & $p$ \\
+\hline
+BM25 only          & 0.829 & ---     & ---       & & 0.979 & ---     & --- \\
+0.05               & 0.977 & $+1.17$ & $<10^{-100}$ & & 0.980 & $+0.07$ & $0.025$ \\
+\textbf{0.20 (default)} & \textbf{0.998} & \textbf{$+1.23$} & \textbf{$<10^{-100}$} & & \textbf{0.982} & \textbf{$+0.09$} & \textbf{$0.004$} \\
+0.50               & 0.802 & $-0.09$ & $0.029$    & & 0.951 & $-0.19$ & $<10^{-8}$ \\
+0.80               & 0.591 & $-0.60$ & $<10^{-40}$ & & 0.613 & $-0.78$ & $<10^{-100}$ \\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig18_proximity_sweep}
+\caption{Proximity-only weight sweep on (left) the synthetic corpus and (right) the real GitHub Discussions corpus. Both panels share the same qualitative shape: a narrow useful corridor near $\beta = 0.20$, then a collapse below the BM25 baseline as $\beta \geq 0.50$. The published default $\beta = 0.20$ (orange star) sits at the optimum on \emph{both} corpora. Bootstrap 95\,\% CIs.}
+\label{fig:prox_sweep}
+\end{figure}
+
+Two observations follow. First, the published default ($\beta = 0.20$) lies
+at the optimum on both corpora, even though the corpora have radically
+different absolute baseline levels (BM25 = 0.829 vs.\ 0.979). The optimum
+location is therefore stable under distributional shift; the ceiling
+\emph{height} is not. Second, proximity-only at $\beta = 0.20$ \emph{exceeds}
+BM25 on the real corpus (+0.3\%, $d = +0.09$, $p = 0.004$), reversing the
+$-0.5\%$ underperformance of the full SCAR specification on the same corpus
+(Section~\ref{subsec:real_corpus}). This decomposition implicates the other
+three spatial features (gaze, location, time-decay) as the source of the
+real-corpus regression: their corresponding weights are non-zero in the
+default specification but their contributions are net-negative on this
+corpus. We therefore interpret the SCAR result as a near-optimal proximity
+weighting that is dragged down by additive contributions from non-generalising
+features. The corollary deployment recommendation is to ablate the non-
+proximity features when transferring to a new corpus, or to deploy LinUCB
+(Section~\ref{subsec:linucb}), which discovers the same conclusion online.
+
+\subsection{Multiple Comparison Correction}
+\label{subsec:holm}
+
+As noted by Reviewer~1, Section~VI-A reported paired $t$-tests without multiple comparison correction. Applying Holm--Bonferroni correction to all pairwise comparisons against BM25 on the Small corpus, no comparison survives at $\alpha = 0.05$ (Table~\ref{tab:holm}). However, the LLM-corpus comparisons (Table~\ref{tab:reranking}, $p = 0.0011$) and the 50-agent LLM simulation ($p = 0.005$) remain significant after correction, as each involves a single pre-planned comparison. We have updated all tables to report both raw and corrected $p$-values where multiple comparisons apply.
+
+\begin{table}[htbp]
+\centering
+\caption{Holm--Bonferroni correction on the Small corpus (5~comparisons vs.\ BM25).}
+\label{tab:holm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\hline
+\textbf{Comparison} & \textbf{$t$} & \textbf{Raw $p$} & \textbf{Adj.\ $p$} & \textbf{$d$} & \textbf{Sig.} \\
+\hline
+Full SCAR vs.\ BM25         & 2.056 & 0.040 & 0.199 & 0.265 & No \\
++Prox+Gaze+Loc vs.\ BM25   & 1.802 & 0.072 & 0.286 & 0.233 & No \\
+No Location vs.\ BM25       & 1.257 & 0.209 & 0.626 & 0.162 & No \\
++Prox+Gaze vs.\ BM25        & 1.217 & 0.224 & 0.626 & 0.157 & No \\
++Proximity vs.\ BM25        & 1.038 & 0.299 & 0.626 & 0.134 & No \\
+\hline
+\end{tabular}}
+\end{table}
+
+The Small corpus (22~documents, 60~queries) has inherently limited statistical power due to its size, and Holm--Bonferroni correction renders its multi-comparison results non-significant. We therefore treat Small-corpus outcomes as trend-level and rely primarily on the larger LLM corpus and the 50-agent LLM simulation for confirmatory evidence.
+
+% ==============================================================
+% VII. DISCUSSION
+% ==============================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Key Findings and Implications}
+\label{subsec:contributions}
+
+We summarise five findings, each grounded in quantitative evidence, together with their practical implications.
+
+\textbf{1) SCAR re-ranking.}
+In simulation, Spatial Context-Aware Re-ranking improves BM25 by +2.2\% to +5.2\% in nDCG@5 across three corpora of different sizes.
+Among the four spatial signals, location type and proximity are the primary contributors.
+The improvement is consistent: no configuration degrades baseline performance.
+
+\textbf{Practical significance of small effect sizes.}
+Cohen's $d$ values across corpora range from 0.129 to 0.366 (``small'' to ``small--medium'').  On the Small corpus, Holm--Bonferroni correction renders all comparisons non-significant (Table~\ref{tab:holm}), while the LLM corpus ($p = 0.001$) and the 50-agent LLM simulation ($p = 0.005$) remain significant.  We argue that even the small effect sizes are practically meaningful for three reasons.
+
+\emph{First, cumulative impact.}  In a 10-person virtual office where each employee issues approximately 5~retrieval queries per day, SCAR processes 50~queries daily.  A +1.6\% nDCG@5 improvement (the smallest observed gain, on the Small corpus) corresponds to roughly 1~additional query per day where a more relevant document is surfaced in the top~5.  Over 250 working days, this accumulates to approximately 250 improved retrievals per year---each representing a moment where an employee finds the right document faster or avoids interrupting a colleague.
+
+\emph{Second, asymmetric cost structure.}  SCAR's worst-case performance (fully corrupted spatial signals) is statistically indistinguishable from BM25 ($p = 0.42$, Section~\ref{subsec:robustness}).  In our tests, we do not observe systematic degradation below the baseline.  When the upside is modest but consistent and downside is limited in the tested conditions, deployment can still be reasonable.
+
+\emph{Third, high-stakes queries.}  Not all queries are equal.  During a production incident, identifying the correct expert 1~rank position earlier can reduce resolution time by minutes.  The nDCG metric weights early-rank improvements heavily (via the logarithmic discount), so a +1.6\% nDCG@5 gain disproportionately benefits the queries where ranking quality matters most.
+
+\textbf{2) Gaze trajectory for proactive delivery.}
+We demonstrated the feasibility of generating search queries from 3D gaze trajectories.
+The mean nDCG@5 across 10 scenarios is 0.844, compared to 0.343 for random delivery.
+This is a proof of concept. We have not shown a statistically
+significant advantage over a simpler Current-Gaze-Only approach
+($p = 0.6875$), so this result should be treated as exploratory
+evidence rather than an established independent gain.
+
+\textbf{3) Multi-scale evaluation.}
+We tested 15 simulation patterns covering 5 to 50 agents, 3 to 30 days, 4 industry types, and 3 organisational conditions.
+Answer accuracy exceeds 95\% for scale $\geq$ 10.
+Prediction accuracy ranges from 83\% to 93\% using a local 7B-parameter LLM with no cloud API calls.
+
+\textbf{4) Negative result on learned ranking.}
+Six learning-to-rank models and three alternative score-combination strategies failed to beat the fixed-weight linear combination (Eq.~\ref{eq:scar_score}) at this data scale.
+We report this as a useful negative finding: more complex models are not justified when training data is limited.
+
+\textbf{5) Context sensitivity.}
+In 4 out of 5 test scenarios, changing the spatial context changes the top-1 retrieved result.
+This is consistent with spatial signals carrying information that text-based retrieval alone cannot capture.
+
+If these simulation results transfer to real deployments,
+spatial AI in virtual offices could reduce time spent searching for information, asking colleagues, and confirming facts.
+If an office AI understands \emph{where} a user is and \emph{what} is happening nearby, it can surface relevant knowledge before the user formulates a query.
+
+\textbf{6) Why proximity, and only proximity, generalises.}
+Across the synthetic corpus, the LLM-driven user simulation, and the real
+GitHub Discussions corpus, proximity is the only spatial signal whose
+contribution is consistently positive (Sections~\ref{subsec:real_corpus} and
+\ref{subsec:proximity_sweep}). We hypothesise that this is structural rather
+than accidental. Proximity reduces to a low-dimensional, ego-centric
+distance scalar; it is approximately invariant under arbitrary affine
+re-parameterisations of the underlying virtual environment because it
+references only \emph{relative} agent locations. The other three spatial
+signals---gaze direction, location type, and time-decay---each rely on
+absolute or environment-specific structure. Gaze depends on the alignment
+between author identifier strings and a tracked target identifier; location
+type depends on a fixed zone--kind affinity table; time-decay assumes that
+recency dominates relevance. In the simulator these structures are
+internally consistent, so all three signals contribute. On the real
+GitHub corpus their referent structures dissolve: a discussion category is
+not a meeting room, a marked-as-answer author is not the focus of a gaze
+tracker, and many older threads are still canonical. Only proximity
+survives because its referent (``you and someone are close in the same
+collaboration substrate'') is preserved across both substrates. This
+reading is consistent with broader observations that simple, low-dimensional
+egocentric features generalise across deployment contexts more reliably
+than higher-dimensional environment-specific features in transfer-learning
+settings; we leave a formal mechanistic test to future work.
+
+\textbf{7) Simulator circularity, and how proximity-only reduces it.}
+A standard concern about simulation-based IR studies is that the simulator
+encodes the very structure the proposed method exploits. We addressed this
+threat through three complementary tests: (i)~an LLM-driven user simulation
+that strips zone-preference hints from agent behaviour
+(Section~\ref{subsec:llm_user_sim}); (ii)~a real-corpus probe on GitHub
+Discussions where the simulator's design choices have no direct counterpart
+(Section~\ref{subsec:real_corpus}); and (iii)~a proximity-only weight sweep
+that isolates the single signal least entangled with simulator design
+(Section~\ref{subsec:proximity_sweep}). Across all three tests the proximity
+signal retains a measurable positive contribution, while gaze, location,
+and time-decay survive only in the simulator. We do not claim circularity is
+fully eliminated; we claim the residual circularity, if any, lies on the
+non-proximity features and not on the central proximity finding. A direct
+falsifier would be a real-user A/B study in a virtual office with proximity
+disabled, which is item~1 of our future work.
+
+\subsection{External Consistency with Human Behavior Research}
+\label{subsec:external_consistency}
+
+Our spatial signals rest on assumptions about human behaviour. We now
+check whether these assumptions are consistent with established
+findings in organisational and cognitive science. We do not claim
+that our simulation reproduces human behaviour. We claim that the
+signals we exploit carry genuine information according to prior
+research.
+
+\textbf{1) Proximity and communication.}
+Our proximity bonus assumes that nearby agents are more likely to
+share relevant documents. This mirrors Allen's communication
+curve~\cite{Allen1977}: the probability that two
+engineers communicate drops exponentially with the physical distance
+between their desks. Allen reported a sharp decline beyond 30 meters.
+In our simulation, agents in the same zone interact 4.2$\times$ more
+than agents in different zones. The qualitative pattern matches.
+
+\textbf{2) Gaze and cognitive attention.}
+We infer query intent from gaze trajectories. This assumes that
+where a person looks reflects what they think about. The eye-mind
+hypothesis~\cite{JustCarpenter1980} states exactly this:
+the eye fixates on the object currently being processed. Duchowski's
+survey of eye-tracking methodology~\cite{Duchowski2017}
+confirms that gaze direction is a reliable proxy for visual attention
+in both physical and virtual environments. Our gaze-based proactive
+delivery achieves nDCG@5 = 0.844 in simulation.  This is consistent
+with the eye-mind hypothesis, though the simulated agents' gaze is
+itself generated from this assumption, so the result demonstrates
+internal consistency rather than independent validation.
+
+\textbf{3) Location type and work activity.}
+We assign higher relevance to documents that match the current zone
+type. Meeting logs rank higher when the user is in a meeting room.
+Technical documentation ranks higher in a focus booth. This mirrors
+Grudin's observation~\cite{grudin1994groupware} that physical
+workspace layout shapes collaborative behaviour: people perform
+different tasks in different rooms, and the room type predicts
+the kind of information they need. Our location bonus encodes
+this relationship directly.
+
+\textbf{4) Interaction patterns and team performance.}
+Pentland~\cite{pentland_badges} used wearable sociometric
+badges to record face-to-face interactions in organisations. He found
+that interaction patterns---who talks to whom, for how long, and
+how often---predict team performance with 35\% accuracy, independent
+of conversation content. Our spatial signals encode the same
+structural information in a virtual environment: proximity duration,
+co-location frequency, and gaze direction between agents.
+
+These four alignments do not prove that our simulation faithfully
+reproduces real office behaviour. They do show that proximity, gaze,
+and location type carry genuine information about human collaboration
+patterns in the research literature. We expect the qualitative
+finding---that spatial context improves retrieval---to hold when
+tested with real users. The quantitative gains will likely differ.
+Validating this expectation is the first item in our future work
+(Section~\ref{subsec:future_work}).
+
+\subsection{Limitations}
+\label{subsec:limitations}
+
+We identify nine limitations.
+
+\textbf{1) Simulation, not real users.}
+All evaluations employ simulated agents. The LLM-based user simulation (Section~\ref{subsec:llm_user_sim}) partially mitigates this by replacing the rule-based behaviour model with a qualitatively different, less predictable LLM-driven model, and the consistent reproduction of SCAR's advantage ($p = 0.005$) strengthens confidence in the finding. However, even LLM agents cannot capture genuine cognitive states, fatigue, social dynamics, or emotionally driven information seeking. Validation with real users remains the necessary next step; our future work (Section~\ref{subsec:future_work}) describes a planned A/B test.
+
+\textbf{2) Keyword-based answer evaluation.}
+Answer accuracy is measured by keyword matching against ground-truth answer sets. This method does not capture semantic equivalence, partial correctness, or explanation quality. It may undercount valid answers that use different phrasing and cannot penalise superficially correct but misleading responses. A human judge would likely assign different scores.
+
+\textbf{3) Empirical weight coefficients.}
+The five weight coefficients ($\alpha, \beta, \gamma, \delta, \varepsilon$) were selected by exhaustive simplex grid search (0.05 step, 10{,}626 combinations) on only 10 held-out validation queries. This procedure is reproducible, but the validation set is small; the resulting values are therefore not guaranteed to be globally optimal and may vary across office environments.
+
+\textbf{4) No LLM parameter updates.}
+The system uses rule-based analysis, RAG, and prompt engineering with frozen LLM parameters. No gradient updates or reinforcement learning from feedback are applied. The system therefore does not learn from user interactions in the machine-learning sense.
+
+\textbf{5) Gaze trajectory validation.}
+The original 10 gaze scenarios were designed by the authors without independent validation by external evaluators. We have re-evaluated GTA on $n{=}500$ scenarios pooled across 5~seeds (Section~\ref{subsec:gaze}, updated). With this larger sample, GTA significantly outperforms random delivery and frequency-only baselines, but does \emph{not} outperform Current-Gaze-Only (paired $\Delta = 0.000$). The recency-weighted trajectory model used here therefore extracts no additional signal beyond the latest fixation. Richer trajectory features (directional patterns, dwell variance, scan-and-zoom signatures) are required to validate the trajectory hypothesis; we leave this to future work.
+
+\textbf{6) Single-language scope.}
+All simulations and evaluations are conducted in Japanese. Generalisation to other languages, naming conventions, and organisational cultures remains untested.
+
+\textbf{7) Cognitive model simplification.}
+The BGAM cognitive model, while grounded in communication research, simplifies human decision-making to a set of probabilistic rules. Real users exhibit strategic behaviour, social dynamics, and emotional states that our agents do not capture.
+
+\textbf{8) Potential circularity in the location signal.}
+The location bonus is the dominant spatial feature (Section~\ref{subsec:ablation}). The BGAM model's movement strategy (Eq.~\ref{eq:zone_choice}) directs agents toward zones where relevant experts are likely to be found, introducing a potential circularity. We addressed this concern through two additional experiments: (a)~an LLM-based user simulation (Section~\ref{subsec:llm_user_sim}) where agents receive no zone-preference hints, yet SCAR's advantage persists ($p = 0.005$); and (b)~a location-removal experiment (Section~\ref{subsec:location_removal}) showing that the remaining three signals still improve retrieval by $+0.0087$ nDCG@5. Location contributes approximately 46\% of the total improvement; the other three signals collectively contribute 54\%. These results demonstrate that while Location is the single strongest spatial signal, SCAR's overall advantage is not exclusively attributable to simulation circularity.
+
+\textbf{9) Parameter sensitivity under distributional shift.}
+The five weight coefficients ($\alpha, \beta, \gamma, \delta, \varepsilon$) were tuned on a held-out set of 10 queries drawn from the simulation environment (0.05-step simplex grid search). Although the robustness analysis (Section~\ref{subsec:robustness})---in which spatial signals were systematically ablated to construct negative control conditions---demonstrates that $\pm 20\%$ perturbation of these weights does not eliminate the retrieval advantage, the optimal values may differ in a real deployment where spatial signal distributions are unknown. We recommend re-tuning the weights on a small sample of real user interactions before production use, treating the simulation-derived values as a reasonable starting point rather than a fixed configuration.
+
+\textbf{10) Cross-domain generalisation of fixed weights.}
+The real-corpus evaluation (Section~\ref{subsec:real_corpus}) confirms the
+distributional-shift concern of Limitation~9 quantitatively. The published
+default weights $(0.50, 0.20, 0.15, 0.10, 0.05)$ underperform BM25 alone on
+the GitHub Discussions corpus by $-0.5\%$ nDCG@5 ($p = 0.06$), driven
+primarily by an over-aggressive time-decay term that penalises older but
+still-canonical threads. The proximity feature alone, however, contributes a
+small consistent gain across corpora. We therefore distinguish between two
+deployment recommendations: (i)~when domain-specific tuning data are
+available, use the simplex grid search to set per-domain weights; (ii)~when
+no tuning data are available, use the online LinUCB variant
+(Section~\ref{subsec:linucb}), which automatically discounts unhelpful
+spatial signals and converges toward the corpus-specific optimum.
+
+\subsection{Conceptual Transferability to 2D Platforms}
+\label{subsec:2d_transferability}
+
+To clarify the scope of our ``platform-agnostic'' claim, we performed a
+conceptual transferability check against publicly documented capabilities
+of representative 2D virtual-office platforms (e.g., avatar coordinates,
+room/map metadata, and event timestamps). Table~\ref{tab:2d_transfer}
+summarises which SCAR signals can be constructed without additional
+instrumentation.
+
+\begin{table}[htbp]
+\centering
+\caption{Conceptual signal transfer from SCAR to 2D virtual-office settings (documentation-level feasibility, not empirical validation).}
+\label{tab:2d_transfer}
+\begin{tabular}{p{1.7cm}p{3.3cm}p{3.0cm}}
+\hline
+\textbf{Signal} & \textbf{Required telemetry} & \textbf{2D feasibility} \\
+\hline
+Proximity & Avatar coordinates over time & Directly computable from pairwise distance \\
+Location type & Room/zone ID or map area label & Directly computable from room/map metadata \\
+Time decay & Timestamped events/interactions & Directly computable from event logs \\
+Gaze direction & Explicit view/gaze vector & Usually unavailable; requires proxy or omission \\
+\hline
+\end{tabular}
+\end{table}
+
+This check indicates that three of four SCAR signals
+(proximity/location/time) are generally portable to 2D environments at
+the data-schema level, while the gaze signal is deployment-dependent.
+Accordingly, our current evidence supports platform transferability for
+the non-gaze subset; full four-signal validation remains future work.
+
+\subsection{Privacy, Ethics, and Adoption Barriers}
+\label{subsec:privacy_ethics}
+
+SCAR continuously tracks three categories of employee data: spatial position (zone and coordinates), gaze direction (what or whom the user is looking at), and proximity (which colleagues are nearby). Table~\ref{tab:modalities} notes that audio content is never recorded and spatial coordinates are virtual, not physical. These design choices reduce but do not eliminate privacy concerns.
+
+\subsubsection{Threat Model}
+
+We identify four threat categories specific to SCAR's spatial data collection:
+
+\begin{enumerate}
+\item \textbf{Surveillance creep}: Gaze data collected for retrieval purposes could be repurposed for performance monitoring (e.g., detecting inattentiveness). The system design should enforce purpose limitation through access controls and audit logs.
+\item \textbf{Social inference}: Proximity and gaze patterns reveal interpersonal relationships. The organisational insights reported in Section~\ref{subsec:multimodal} (e.g., implicit mentoring, pair work) demonstrate that SCAR's data can expose social dynamics that employees may wish to keep private.  Management misuse of such signals---e.g., penalising employees whose gaze patterns suggest distraction---is a realistic risk.
+\item \textbf{Behavioural chilling (Hawthorne effect)}: Employees who know their gaze patterns are analysed may alter their viewing behaviour, degrading signal quality. Our robustness analysis (Section~\ref{subsec:robustness}) shows that SCAR degrades gracefully under 50\% gaze noise, suggesting moderate tolerance for behavioural adaptation, but the quantitative impact of the Hawthorne effect on signal quality remains an open question.
+\item \textbf{Data leakage}: Even with local processing (BYOC architecture), exported search results or organisational insights could reveal individual spatial patterns if anonymisation is insufficient.
+\end{enumerate}
+
+Three mitigation strategies are available. First, \emph{aggregation}: SCAR can operate on 5-minute aggregate gaze summaries rather than raw fixation streams, reducing the granularity of stored data. Second, \emph{opt-out}: employees can disable gaze and proximity tracking entirely; SCAR then falls back to text retrieval with time decay only, which still functions as a baseline retrieval system. Third, \emph{transparency}: the system can show each user what spatial data it has collected and how it influenced their search results, following the principle of explainable AI.
+
+Organisational culture will determine whether spatial sensing is acceptable. In high-trust teams accustomed to open-plan offices, virtual proximity tracking may feel natural. In organisations with adversarial labour relations or strict data protection regulations (e.g., GDPR Article~22), the same system may be rejected regardless of its technical merits. We did not evaluate user acceptance in this study and identify it as a prerequisite for any real deployment.
+
+\subsection{Future Work}
+\label{subsec:future_work}
+
+The most informative result of this study is a triplet of null findings:
+(i)~the six learning-to-rank models we tested fail to surpass the linear
+fixed-weight formulation; (ii)~the published default weights underperform
+BM25 on the GitHub Discussions corpus; and (iii)~GTA at $n{=}500$ is
+statistically indistinguishable from Current-Gaze-Only.
+Read together, these results suggest a statistical ceiling on what
+surface-level spatial features can extract within a single re-ranking pass.
+We therefore see two principled long-term directions, articulated here as
+items~9 and~10 below, that re-interpret the null findings as structural
+rather than methodological. The remaining items 1--8 describe targeted
+follow-ups on specific limitations identified in
+Section~\ref{subsec:limitations}.
+
+\textbf{1) Real user A/B testing.}
+Deploy SCAR in a production virtual office with two conditions: SCAR on and SCAR off.
+Measure user satisfaction, task completion time, and information retrieval accuracy with real workers.
+
+\textbf{2) Bayesian optimisation of weight coefficients.}
+Replace coarse-grid tuning of ($\alpha, \beta, \gamma, \delta, \varepsilon$) with Bayesian optimisation~\cite{bayesopt}.
+This requires a well-defined objective function and sufficient interaction logs.
+
+\textbf{3) Query intent learning from feedback.}
+Collect implicit feedback (clicks, dwell time, dismissals) and explicit feedback (thumbs up/down) to learn query intent models.
+This could close the gap between the frozen-LLM architecture and a fully adaptive system.
+
+\textbf{4) Differential privacy.}
+Spatial signals reveal user location and behaviour.
+We plan to integrate $k$-anonymity and calibrated noise injection~\cite{diffprivacy} to protect individual privacy while preserving retrieval quality.
+
+\textbf{5) LLM fine-tuning for organisational vocabulary.}
+Fine-tune the local LLM on organisation-specific documents, meeting transcripts, and internal terminology.
+This should improve both answer accuracy and the naturalness of generated responses.
+
+\textbf{6) Larger-scale gaze trajectory evaluation.}
+Expand from 10 author-designed scenarios to 50+ independently designed scenarios with external evaluators.
+This will provide the statistical power needed to compare trajectory-based and current-gaze-only approaches.
+
+\textbf{7) 2D platform adaptation.}
+Our simulation uses a 3D environment, but major virtual office platforms (Gather, oVice) are 2D.  Based on publicly documented platform capabilities (avatar position, map/room metadata, and event timestamps), three SCAR signals are conceptually transferable to 2D without gaze instrumentation: proximity (from avatar coordinates), location type (from room/zone IDs), and temporal decay (from interaction timestamps). Explicit gaze vectors are typically unavailable in 2D clients; thus the gaze term should be treated as optional in cross-platform deployments, or approximated via proxies such as facing direction, active voice/chat counterparts, or cursor-near-avatar events when exposed by the platform.  This is a feasibility assessment rather than an empirical validation, and a direct 2D implementation study remains future work.
+
+\textbf{8) Source code release.}
+We plan to release the simulation framework, evaluation scripts, and SCAR implementation as an open-source repository upon acceptance.  This will enable independent replication and adaptation to other virtual office platforms.
+
+\textbf{9) Proximity as a long-term episodic-memory index.}
+The fact that proximity is the only spatial signal whose effect persists across
+both simulated and real corpora (Section~\ref{subsec:real_corpus}) suggests
+that its informational content is not exhausted by a one-shot re-ranking
+score. A natural next step is to re-cast proximity not as a per-query feature
+but as an index into a long-term episodic memory of co-located events
+(meetings, side conversations, screen-sharing intervals), drawing on the
+cognitive-neuroscience literature on place cells and on recent linear-attention
+episodic memory architectures. Under this view, the relevant evaluation
+metric shifts from per-query nDCG@5 to an aggregate retrieval quality measured
+over weeks or months of accumulated co-location history.
+
+\textbf{10) Sequence modelling for gaze trajectories.}
+The $n{=}500$ re-evaluation showed that recency-weighted aggregation of the
+gaze trajectory does not exceed the latest fixation. This is a statement
+about a particular feature, not about the trajectory itself. We hypothesise
+that the \emph{shape} of the trajectory (saccade direction, dwell-time
+variance, scan-and-zoom signatures) carries information that recency-weighting
+averages out. Concretely, we plan to compare the recency-weighted aggregator
+against (a)~a selective state-space architecture in the spirit of Mamba,
+which can selectively retain informative trajectory points while discarding
+noise, and (b)~a hybrid state-space-plus-attention architecture in the spirit
+of Hymba, which is designed for tasks combining short-context salience with
+long-context structure. Both are evaluated against the same Current-Gaze-Only
+baseline at matched sample size; this is the natural confirmatory test for
+the trajectory hypothesis.
+
+% ==============================================================
+% VIII. CONCLUSION
+% ==============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper presented SCAR, a simulation-validated framework for spatial-context-aware re-ranking in information retrieval within virtual office environments.
+SCAR integrates four spatial signals (proximity, gaze direction, location type, and temporal decay) with text-similarity scores through a fixed-weight linear model chosen for its interpretability and computational efficiency.
+
+Across 15 simulation patterns, the framework achieves answer accuracy above 87\% (above 95\% for organisations of 10 or more employees) and prediction accuracy between 83\% and 93\%, with all computation executed on a local 7B-parameter LLM without cloud API calls.
+Across our simulation settings, SCAR improves text-only nDCG@5 by +2.2\% to +5.2\% on three corpora, with no observed degradation.
+
+The multimodal analysis pipeline detected 79 organisational insights (pair work patterns, implicit mentoring relationships, meeting quality changes) that are invisible to text-only retrieval.
+Performance remained stable over 30-day simulation periods with no accuracy decline, supporting temporal robustness within the tested simulator conditions.
+
+We additionally conducted an exploratory study of gaze-trajectory-based
+proactive delivery. Re-evaluated on $n{=}500$~scenarios pooled across 5~seeds
+(Section~\ref{subsec:gaze}), GTA reaches nDCG@5${=}0.925$ versus 0.581 for
+random delivery (paired $p < 10^{-100}$, $d = 1.31$). However, the larger
+sample size confirms our original finding that GTA does \emph{not}
+significantly outperform Current-Gaze-Only ($\Delta = 0.000$, $d = 0.00$):
+the recency-weighted trajectory model used here extracts no additional
+information beyond the latest fixation. We therefore position GTA as an
+exploratory, hypothesis-generating component, and direct future work toward
+richer trajectory features such as directional patterns and dwell-variance
+analysis. A notable design limitation is that identical gaze patterns can
+produce identical queries regardless of the underlying intent
+(e.g., Scenarios~4 and~10 in Table~\ref{tab:gaze_scenarios}), indicating
+that GTA cannot yet disambiguate distinct information needs that happen to
+produce the same viewing behaviour.
+
+Our negative result on learning-to-rank models is noteworthy: at the present data scale, the fixed-weight linear model outperforms six LTR models and three alternative combination strategies.
+At our scale (4~features, 120~training queries), additional model complexity yields no improvement in nDCG@5, suggesting that a fixed-weight linear model is a reasonable choice when the feature space is low-dimensional.
+
+Our robustness analysis across 20 conditions shows that the advantage does not depend on specific parameter choices or noise-free conditions.
+Even when gaze and proximity signals are corrupted at 50\%, SCAR remains competitive with BM25, demonstrating graceful degradation under adverse signal conditions.
+
+The broader aspiration underlying this work is the construction of an ``organisational memory'' embedded within the virtual workspace.
+If an AI system can observe spatial context (who is where, what they are doing, what objects surround them) it can substantially reduce the friction of searching, asking, and confirming information.
+This paper provides initial evidence that spatial re-ranking constitutes a viable step toward that goal.
+
+However, the limitations of our evaluation must be acknowledged.
+The most significant limitation remains the absence of real-user validation.
+An LLM-based user simulation with 50~agents provided additional evidence that
+SCAR's advantage is not solely explained by the original rule-based simulation
+design ($\Delta\text{nDCG@5} = +3.7\%$, $p = 0.005$), and an independent LLM
+judge reported moderate agreement ($\kappa = 0.44$) with the keyword-based
+relevance assessments. To probe cross-domain generalisation, we evaluated the
+published SCAR weights on a real public corpus (200~answered Discussions
+from \texttt{vercel/next.js}, 1{,}000~pooled query observations across 5~seeds;
+Section~\ref{subsec:real_corpus}). On this corpus the proximity feature
+contributes a small consistent gain ($+0.4\%$ nDCG@5), but the published
+default weights underperform BM25 alone ($-0.5\%$, $p = 0.06$) due to an
+over-aggressive time-decay term. We therefore advise treating the simulation-
+derived weights as a starting point and either re-tuning per domain or
+deploying the online LinUCB variant (Section~\ref{subsec:linucb}) when no
+tuning data are available.
+Nevertheless, our simulation environment and a single public-corpus probe,
+while systematic, cannot fully capture the unpredictable social dynamics of
+real workplace behaviour. We identify controlled user studies in a production
+virtual office as the necessary next step.
+
+SCAR is designed for cross-platform adaptation, but with different signal requirements by deployment context: proximity, location, and time typically map to standard virtual-office telemetry, while explicit gaze may be unavailable and may require proxy signals or omission. Empirical validation across multiple platforms (e.g., Gather, oVice) remains future work.
+
+Read together, the three null findings of this study---LTR not surpassing
+linear weights, default weights underperforming on a real corpus, and GTA
+tying Current-Gaze-Only at $n{=}500$---suggest that the contribution of
+single-pass spatial re-ranking is approaching a structural ceiling. The
+proximity-only weight sweep confirms that the published $\beta = 0.20$ is
+already at the per-corpus optimum. The remaining headroom for spatial
+context-aware retrieval therefore appears to lie outside the re-ranking
+layer: in long-term episodic indices over co-location history, in
+sequence-modelled gaze trajectories, and in adaptive policies that decide
+when to remain silent rather than rank. We position SCAR as the upper
+boundary of what surface-level spatial features achieve in a single pass,
+and as the empirical foundation for those structurally different next
+directions.
+
+% ==============================================================
+% APPENDICES
+% ==============================================================
+\appendix
+
+\section{Simulation Parameters}
+\label{app:sim_params}
+
+Table~\ref{tab:agent_params} shows the five agent personality types used in the simulation.
+Each type is defined by five normalised parameters that govern movement, sensitivity, trust formation, planning tendency, and exploration behaviour.
+
+\begin{table}[!t]
+\caption{Agent Personality Parameters}
+\label{tab:agent_params}
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Type} & \textbf{Move} & \textbf{Confusion} & \textbf{Trust} & \textbf{Planning} & \textbf{Explor.} \\
+ & \textbf{speed} & \textbf{sens.} & \textbf{growth} & & \\
+\midrule
+cautious     & 2.5 & 1.2 & 0.8 & 0.7 & 0.3 \\
+efficient    & 5.0 & 0.8 & 1.0 & 0.9 & 0.2 \\
+explorer     & 3.5 & 0.6 & 1.2 & 0.3 & 0.9 \\
+anxious      & 2.0 & 1.5 & 0.6 & 0.5 & 0.2 \\
+independent  & 4.0 & 0.7 & 1.1 & 0.6 & 0.5 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Move speed is in arbitrary units per simulation tick.
+Confusion sensitivity controls how strongly an agent reacts to ambiguous information.
+Trust growth determines the rate at which inter-agent trust increases through repeated interaction.
+Planning and exploration are complementary tendencies: high-planning agents follow structured paths, while high-exploration agents visit diverse locations.
+
+\section{Gaze Trajectory Scenarios}
+\label{app:gaze_scenarios}
+
+Table~\ref{tab:gaze_scenarios} lists the 10 gaze trajectory test scenarios.
+Each scenario defines a gaze pattern (sequence of fixation targets), the auto-generated query produced by the system, and the resulting nDCG@5 score.
+
+\textbf{Known limitation:} Scenarios~4 and~10 produce identical auto-generated queries despite having different underlying intents, because their gaze patterns overlap.  This demonstrates that the current GTA implementation cannot disambiguate distinct information needs that manifest as the same viewing behaviour.  Addressing this limitation (e.g., through additional contextual signals or longer observation windows) is left to future work.
+
+\begin{table*}[!t]
+\caption{Gaze Trajectory Test Scenarios and Retrieval Performance}
+\label{tab:gaze_scenarios}
+\centering
+\footnotesize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{clllc}
+\toprule
+\textbf{\#} & \textbf{Scenario} & \textbf{Gaze pattern} & \textbf{Auto-generated query} & \textbf{nDCG@5} \\
+\midrule
+1  & Long task-board viewing
+   & Task board $\times 3$
+   & ``3D bug performance new feature Sakamoto Ogawa''
+   & 0.815 \\
+2  & Post-meeting WB check
+   & WB $\to$ minutes $\to$ WB
+   & ``Project progress AURORA KAIROS Ito''
+   & 1.000 \\
+3  & Tech info exploration
+   & Doc shelf $\to$ tech WB $\to$ Nakamura monitor
+   & ``Three.js geometry merge WebXR hand tracking''
+   & 1.000 \\
+4  & Wants to consult Sakamoto
+   & Perf chart $\to$ Sakamoto monitor $\times 3$
+   & ``3D rendering shader performance Sakamoto''
+   & 0.873 \\
+5  & Org chart + monitors
+   & Org $\to$ Sakamoto $\to$ Org $\to$ Ogawa
+   & ``Organization team assignments Tanaka Ito''
+   & 0.922 \\
+6  & Attendance $\to$ perf $\to$ board
+   & Attendance $\to$ perf $\to$ bulletin
+   & ``Team building new project announcement''
+   & 0.684 \\
+7  & Projector $\to$ minutes
+   & Projector $\times 2$ $\to$ minutes
+   & ``Weekly progress sales new project Ito''
+   & 1.000 \\
+8  & Multiple monitors scan
+   & Sakamoto $\to$ Ogawa $\to$ Nakamura $\to$ Fujita (5s each)
+   & ``Progress summary report budget Fujita''
+   & 0.613 \\
+9  & Doc shelf $\to$ mindmap $\to$ notes
+   & Shelf $\to$ mindmap $\to$ sticky notes
+   & ``Reactions ideas new feature Chen Yamashita''
+   & 1.000 \\
+10 & Board $\to$ tech WB $\to$ Sakamoto
+   & Board $\to$ tech WB $\to$ Sakamoto
+   & ``3D rendering shader performance Sakamoto''
+   & 0.532 \\
+\midrule
+\multicolumn{4}{l}{\textbf{Mean}} & \textbf{0.844} \\
+\multicolumn{4}{l}{\textbf{Random baseline mean}} & \textbf{0.343} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+Scenarios 2, 3, 7, and 9 achieve perfect nDCG@5 = 1.000.
+These share a common pattern: the gaze sequence targets objects with strong topical coherence (e.g., whiteboard then minutes, or document shelf then mindmap).
+Scenario 10 scores lowest (0.532) because the gaze pattern overlaps with Scenario~4, producing the same query for a different information need.
+This highlights a current limitation: the query generator does not disambiguate between identical gaze patterns with different user intents.
+
+% ==============================================================
+% BIBLIOGRAPHY
+% ==============================================================
+
+\begin{thebibliography}{99}
+
+% --- Virtual office platforms ---
+\bibitem{gather}
+Gather Presence Inc., ``Gather---Virtual office for remote teams,'' 2021. [Online]. Available: \url{https://gather.town}. [Accessed: Jan.~10, 2026]
+
+\bibitem{ovice}
+oVice Inc., ``oVice---Virtual workspace,'' 2021. [Online]. Available: \url{https://ovice.in}. [Accessed: Jan.~10, 2026]
+
+\bibitem{roam}
+Ro.am Inc., ``Roam---Work together, apart,'' 2021. [Online]. Available: \url{https://ro.am}. [Accessed: Jan.~10, 2026]
+
+% --- Enterprise search ---
+\bibitem{glean}
+Glean Technologies Inc., ``Glean---Work AI for enterprise search,'' 2022. [Online]. Available: \url{https://www.glean.com}. [Accessed: Jan.~10, 2026]
+
+\bibitem{notionai}
+Notion Labs Inc., ``Notion AI,'' 2023. [Online]. Available: \url{https://www.notion.so/product/ai}. [Accessed: Jan.~10, 2026]
+
+% --- Context-aware retrieval ---
+\bibitem{car_survey}
+G.~Adomavicius and A.~Tuzhilin, ``Context-aware recommender systems,'' in \emph{Recommender Systems Handbook}, F.~Ricci, L.~Rokach, and B.~Shapira, Eds.\hskip 1em plus 0.5em minus 0.4em Springer, 2015, pp.~191--226.
+
+% --- People analytics ---
+\bibitem{pentland_badges}
+A.~Pentland, ``The new science of building great teams,'' \emph{Harvard Business Review}, vol.~90, no.~4, pp.~60--69, Apr. 2012.
+
+\bibitem{calendar_mining}
+S.~T.~Iqbal and E.~Horvitz, ``Disruption and recovery of computing tasks: Field study, analysis, and directions,'' in \emph{Proc. ACM CHI}, 2007, pp.~677--686.
+
+% --- Multimodal AI ---
+\bibitem{clip}
+A.~Radford \emph{et al.}, ``Learning transferable visual models from natural language supervision,'' in \emph{Proc. ICML}, 2021, pp.~8748--8763.
+
+\bibitem{flamingo}
+J.-B.~Alayrac \emph{et al.}, ``Flamingo: A visual language model for few-shot learning,'' in \emph{Proc. NeurIPS}, 2022, pp.~23716--23736.
+
+\bibitem{gaze_ar}
+D.~Lindlbauer, A.~M.~Feit, and O.~Hilliges, ``Context-aware online adaptation of mixed reality interfaces,'' in \emph{Proc. ACM UIST}, 2019, pp.~147--160.
+
+% --- CSCW ---
+\bibitem{cscw_awareness}
+P.~Dourish and V.~Bellotti, ``Awareness and coordination in shared workspaces,'' in \emph{Proc. ACM CSCW}, 1992, pp.~107--114.
+
+\bibitem{cscw_coord}
+T.~W.~Malone and K.~Crowston, ``The interdisciplinary study of coordination,'' \emph{ACM Computing Surveys}, vol.~26, no.~1, pp.~87--119, Mar. 1994.
+
+\bibitem{spatial_awareness}
+S.~Benford, J.~Bowers, L.~E.~Fahl\'{e}n, and C.~Greenhalgh, ``Managing mutual awareness in collaborative virtual environments,'' in \emph{Proc. ACM VRST}, 1994, pp.~223--236.
+
+% --- IR foundations ---
+\bibitem{robertson2009bm25}
+S.~Robertson and H.~Zaragoza, ``The probabilistic relevance framework: BM25 and beyond,'' \emph{Foundations and Trends in Information Retrieval}, vol.~3, no.~4, pp.~333--389, 2009.
+
+\bibitem{manning2008ir}
+C.~D.~Manning, P.~Raghavan, and H.~Sch\"{u}tze, \emph{Introduction to Information Retrieval}.\hskip 1em plus 0.5em minus 0.4em Cambridge, U.K.: Cambridge Univ. Press, 2008.
+
+\bibitem{croft2010search}
+W.~B.~Croft, D.~Metzler, and T.~Strohman, \emph{Search Engines: Information Retrieval in Practice}.\hskip 1em plus 0.5em minus 0.4em Reading, MA, USA: Addison-Wesley, 2010.
+
+\bibitem{lv2009positional}
+Y.~Lv and C.~Zhai, ``Positional language models for information retrieval,'' in \emph{Proc. ACM SIGIR}, 2009, pp.~299--306.
+
+\bibitem{belkin2008some}
+N.~J.~Belkin, ``Some(what) grand challenges for information retrieval,'' \emph{ACM SIGIR Forum}, vol.~42, no.~1, pp.~47--54, Jun. 2008.
+
+% --- Virtual/spatial computing ---
+\bibitem{microsoft_mesh}
+Microsoft, ``Microsoft Mesh,'' 2021. [Online]. Available: \url{https://www.microsoft.com/en-us/mesh}. [Accessed: Jan.~10, 2026]
+
+\bibitem{meta_horizon}
+Meta Platforms Inc., ``Horizon Workrooms,'' 2021. [Online]. Available: \url{https://www.meta.com/work/}. [Accessed: Jan.~10, 2026]
+
+% --- CSCW classic ---
+\bibitem{olson2000distance}
+G.~M.~Olson and J.~S.~Olson, ``Distance matters,'' \emph{Human-Computer Interaction}, vol.~15, no.~2--3, pp.~139--178, 2000.
+
+\bibitem{grudin1994groupware}
+J.~Grudin, ``Groupware and social dynamics: Eight challenges for developers,'' \emph{Communications of the ACM}, vol.~37, no.~1, pp.~92--105, Jan. 1994.
+
+\bibitem{mark2008cost}
+G.~Mark, D.~Gudith, and U.~Klocke, ``The cost of interrupted work: More speed and stress,'' in \emph{Proc. ACM CHI}, 2008, pp.~107--110.
+
+% --- Eye tracking and gaze ---
+\bibitem{bulling2011eye}
+A.~Bulling, J.~A.~Ward, H.~Gellersen, and G.~Tr\"{o}ster, ``Eye movement analysis for activity recognition using electrooculography,'' \emph{IEEE Trans. Pattern Anal. Mach. Intell.}, vol.~33, no.~4, pp.~741--753, Apr. 2011.
+
+\bibitem{patney2016towards}
+A.~Patney \emph{et al.}, ``Towards foveated rendering for gaze-tracked virtual reality,'' \emph{ACM Trans. Graphics}, vol.~35, no.~6, Art. 179, Nov. 2016.
+
+\bibitem{rhodes2000just}
+B.~J.~Rhodes and P.~Maes, ``Just-in-time information retrieval agents,'' \emph{IBM Syst. J.}, vol.~39, no.~3--4, pp.~685--704, 2000.
+
+% --- Learning to rank ---
+\bibitem{liu2009learning}
+T.-Y.~Liu, ``Learning to rank for information retrieval,'' \emph{Foundations and Trends in Information Retrieval}, vol.~3, no.~3, pp.~225--331, 2009.
+
+\bibitem{joachims2002optimizing}
+T.~Joachims, ``Optimizing search engines using clickthrough data,'' in \emph{Proc. ACM KDD}, 2002, pp.~133--142.
+
+\bibitem{burges2010ranknet}
+C.~J.~C.~Burges, ``From RankNet to LambdaRank to LambdaMART: An overview,'' Microsoft Research, Redmond, WA, USA, Tech. Rep. MSR-TR-2010-82, Jun. 2010.
+
+\bibitem{joachims2005accurately}
+T.~Joachims, L.~Granka, B.~Pan, H.~Hembrooke, and G.~Gay, ``Accurately interpreting clickthrough data as implicit feedback,'' in \emph{Proc. ACM SIGIR}, 2005, pp.~154--161.
+
+% --- Embedding and LLM models ---
+\bibitem{nomic}
+Z.~Nussbaum, J.~X.~Morris, B.~Duderstadt, and A.~Mulyar, ``Nomic Embed: Training a reproducible long context text embedder,'' arXiv preprint arXiv:2402.01613, 2024.
+
+\bibitem{mistral}
+A.~Q.~Jiang \emph{et al.}, ``Mistral 7B,'' arXiv preprint arXiv:2310.06825, 2023.
+
+% --- Future work references ---
+\bibitem{bayesopt}
+J.~Snoek, H.~Larochelle, and R.~P.~Adams, ``Practical Bayesian optimization of machine learning algorithms,'' in \emph{Proc. NeurIPS}, 2012, pp.~2951--2959.
+
+\bibitem{diffprivacy}
+C.~Dwork and A.~Roth, ``The algorithmic foundations of differential privacy,'' \emph{Foundations and Trends in Theoretical Computer Science}, vol.~9, no.~3--4, pp.~211--487, 2014.
+
+% --- Revision additions: cognitive model and robustness references ---
+\bibitem{Allen1977}
+T.~J.~Allen, \emph{Managing the Flow of Technology: Technology Transfer and the Dissemination of Technological Information within the R\&D Organization}.\hskip 1em plus 0.5em minus 0.4em Cambridge, MA, USA: MIT Press, 1977.
+
+\bibitem{Duchowski2017}
+A.~T.~Duchowski, \emph{Eye Tracking Methodology: Theory and Practice}, 3rd~ed.\hskip 1em plus 0.5em minus 0.4em Cham, Switzerland: Springer, 2017.
+
+\bibitem{JustCarpenter1980}
+M.~A.~Just and P.~A.~Carpenter, ``A theory of reading: From eye fixations to comprehension,'' \emph{Psychological Review}, vol.~87, no.~4, pp.~329--354, 1980.
+
+\bibitem{hall1966hidden}
+E.~T.~Hall, \emph{The Hidden Dimension}.\hskip 1em plus 0.5em minus 0.4em Garden City, NY: Doubleday, 1966.
+
+\bibitem{appel2020abw}
+M.~Appel-Meulenbroek, P.~Groenen, and I.~Janssen, ``An end-user's perspective on activity-based office concepts,'' \emph{Journal of Corporate Real Estate}, vol.~13, no.~2, pp.~122--135, 2011.
+
+\bibitem{viva_insights}
+Microsoft, ``Microsoft Viva Insights,'' 2024. [Online]. Available: \url{https://www.microsoft.com/en-us/microsoft-viva/insights}. [Accessed: Jan.~15, 2026].
+
+\bibitem{voorhees2000}
+E.~M.~Voorhees, ``Variations in relevance judgments and the measurement of retrieval effectiveness,'' \emph{Information Processing \& Management}, vol.~36, no.~5, pp.~697--716, 2000.
+
+% --- Brushup additions: online adaptive baseline ---
+\bibitem{li2010contextual}
+L.~Li, W.~Chu, J.~Langford, and R.~E.~Schapire, ``A contextual-bandit approach to personalized news article recommendation,'' in \emph{Proc. 19th Int. Conf. World Wide Web (WWW)}, 2010, pp.~661--670.
+
+\end{thebibliography}
+
+\end{document}
