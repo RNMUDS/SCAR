@@ -1,0 +1,3327 @@
+[
+  {
+    "scenario_id": "gta0000",
+    "role": "engineer",
+    "info_need": "prior_art",
+    "gaze_pattern": "single_fixation",
+    "description": "A engineer engaged in prior_art with a single_fixation gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p020",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p020",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p012",
+      "d_distract_p009",
+      "d_distract_p019"
+    ]
+  },
+  {
+    "scenario_id": "gta0001",
+    "role": "engineer",
+    "info_need": "prior_art",
+    "gaze_pattern": "two_target_alt",
+    "description": "A engineer engaged in prior_art with a two_target_alt gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p018",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p019",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p018",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p019",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p018",
+    "distractor_doc_ids": [
+      "d_distract_p002",
+      "d_distract_p012",
+      "d_distract_p011",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0002",
+    "role": "engineer",
+    "info_need": "prior_art",
+    "gaze_pattern": "scan_zoom",
+    "description": "A engineer engaged in prior_art with a scan_zoom gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p013",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p016",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p009",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p009",
+    "distractor_doc_ids": [
+      "d_distract_p000",
+      "d_distract_p013",
+      "d_distract_p016",
+      "d_distract_p011"
+    ]
+  },
+  {
+    "scenario_id": "gta0003",
+    "role": "engineer",
+    "info_need": "prior_art",
+    "gaze_pattern": "drift_return",
+    "description": "A engineer engaged in prior_art with a drift_return gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p022",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p013",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p012",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p022",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p022",
+    "distractor_doc_ids": [
+      "d_distract_p013",
+      "d_distract_p012",
+      "d_distract_p015",
+      "d_distract_p009"
+    ]
+  },
+  {
+    "scenario_id": "gta0004",
+    "role": "engineer",
+    "info_need": "debug_help",
+    "gaze_pattern": "single_fixation",
+    "description": "A engineer engaged in debug_help with a single_fixation gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p010",
+      "d_distract_p008",
+      "d_distract_p000",
+      "d_distract_p014"
+    ]
+  },
+  {
+    "scenario_id": "gta0005",
+    "role": "engineer",
+    "info_need": "debug_help",
+    "gaze_pattern": "two_target_alt",
+    "description": "A engineer engaged in debug_help with a two_target_alt gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p003",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p008",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p003",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p008",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p003",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p008",
+      "d_distract_p010",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0006",
+    "role": "engineer",
+    "info_need": "debug_help",
+    "gaze_pattern": "scan_zoom",
+    "description": "A engineer engaged in debug_help with a scan_zoom gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p016",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p004",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p001",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p014",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p014",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p004",
+      "d_distract_p001",
+      "d_distract_p011"
+    ]
+  },
+  {
+    "scenario_id": "gta0007",
+    "role": "engineer",
+    "info_need": "debug_help",
+    "gaze_pattern": "drift_return",
+    "description": "A engineer engaged in debug_help with a drift_return gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p001",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p000",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p014",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p001",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p000",
+      "d_distract_p014",
+      "d_distract_p010",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0008",
+    "role": "engineer",
+    "info_need": "design_ref",
+    "gaze_pattern": "single_fixation",
+    "description": "A engineer engaged in design_ref with a single_fixation gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p014",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p014",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p005",
+      "d_distract_p008",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0009",
+    "role": "engineer",
+    "info_need": "design_ref",
+    "gaze_pattern": "two_target_alt",
+    "description": "A engineer engaged in design_ref with a two_target_alt gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p003",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p003",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p002",
+      "d_distract_p017",
+      "d_distract_p003",
+      "d_distract_p023"
+    ]
+  },
+  {
+    "scenario_id": "gta0010",
+    "role": "engineer",
+    "info_need": "design_ref",
+    "gaze_pattern": "scan_zoom",
+    "description": "A engineer engaged in design_ref with a scan_zoom gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p022",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p002",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p019",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p003",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p003",
+    "distractor_doc_ids": [
+      "d_distract_p022",
+      "d_distract_p002",
+      "d_distract_p019",
+      "d_distract_p021"
+    ]
+  },
+  {
+    "scenario_id": "gta0011",
+    "role": "engineer",
+    "info_need": "design_ref",
+    "gaze_pattern": "drift_return",
+    "description": "A engineer engaged in design_ref with a drift_return gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p016",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p022",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p006",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p022",
+      "d_distract_p017",
+      "d_distract_p004"
+    ]
+  },
+  {
+    "scenario_id": "gta0012",
+    "role": "engineer",
+    "info_need": "status_check",
+    "gaze_pattern": "single_fixation",
+    "description": "A engineer engaged in status_check with a single_fixation gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p001",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p012",
+      "d_distract_p015",
+      "d_distract_p000"
+    ]
+  },
+  {
+    "scenario_id": "gta0013",
+    "role": "engineer",
+    "info_need": "status_check",
+    "gaze_pattern": "two_target_alt",
+    "description": "A engineer engaged in status_check with a two_target_alt gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p013",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p001",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p013",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p001",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p013",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p009",
+      "d_distract_p012",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0014",
+    "role": "engineer",
+    "info_need": "status_check",
+    "gaze_pattern": "scan_zoom",
+    "description": "A engineer engaged in status_check with a scan_zoom gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p024",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p001",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p003",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p017",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p001",
+      "d_distract_p003",
+      "d_distract_p013"
+    ]
+  },
+  {
+    "scenario_id": "gta0015",
+    "role": "engineer",
+    "info_need": "status_check",
+    "gaze_pattern": "drift_return",
+    "description": "A engineer engaged in status_check with a drift_return gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p003",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p024",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p015",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p003",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p003",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p015",
+      "d_distract_p020",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0016",
+    "role": "engineer",
+    "info_need": "onboarding",
+    "gaze_pattern": "single_fixation",
+    "description": "A engineer engaged in onboarding with a single_fixation gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p017",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p020",
+      "d_distract_p007",
+      "d_distract_p024",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0017",
+    "role": "engineer",
+    "info_need": "onboarding",
+    "gaze_pattern": "two_target_alt",
+    "description": "A engineer engaged in onboarding with a two_target_alt gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p021",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p009",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p021",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p009",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p021",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p009",
+      "d_distract_p022",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0018",
+    "role": "engineer",
+    "info_need": "onboarding",
+    "gaze_pattern": "scan_zoom",
+    "description": "A engineer engaged in onboarding with a scan_zoom gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p020",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p003",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p023",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p006",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p020",
+      "d_distract_p003",
+      "d_distract_p023",
+      "d_distract_p017"
+    ]
+  },
+  {
+    "scenario_id": "gta0019",
+    "role": "engineer",
+    "info_need": "onboarding",
+    "gaze_pattern": "drift_return",
+    "description": "A engineer engaged in onboarding with a drift_return gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p001",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p021",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p002",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p001",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p021",
+      "d_distract_p002",
+      "d_distract_p006",
+      "d_distract_p019"
+    ]
+  },
+  {
+    "scenario_id": "gta0020",
+    "role": "designer",
+    "info_need": "prior_art",
+    "gaze_pattern": "single_fixation",
+    "description": "A designer engaged in prior_art with a single_fixation gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p021",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p021",
+    "distractor_doc_ids": [
+      "d_distract_p014",
+      "d_distract_p001",
+      "d_distract_p005",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0021",
+    "role": "designer",
+    "info_need": "prior_art",
+    "gaze_pattern": "two_target_alt",
+    "description": "A designer engaged in prior_art with a two_target_alt gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p018",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p003",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p018",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p003",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p018",
+    "distractor_doc_ids": [
+      "d_distract_p003",
+      "d_distract_p008",
+      "d_distract_p017",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0022",
+    "role": "designer",
+    "info_need": "prior_art",
+    "gaze_pattern": "scan_zoom",
+    "description": "A designer engaged in prior_art with a scan_zoom gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p017",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p012",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p017",
+      "d_distract_p012",
+      "d_distract_p024"
+    ]
+  },
+  {
+    "scenario_id": "gta0023",
+    "role": "designer",
+    "info_need": "prior_art",
+    "gaze_pattern": "drift_return",
+    "description": "A designer engaged in prior_art with a drift_return gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p003",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p000",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p003",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p003",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p000",
+      "d_distract_p020",
+      "d_distract_p010"
+    ]
+  },
+  {
+    "scenario_id": "gta0024",
+    "role": "designer",
+    "info_need": "debug_help",
+    "gaze_pattern": "single_fixation",
+    "description": "A designer engaged in debug_help with a single_fixation gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p008",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p000",
+      "d_distract_p020",
+      "d_distract_p021"
+    ]
+  },
+  {
+    "scenario_id": "gta0025",
+    "role": "designer",
+    "info_need": "debug_help",
+    "gaze_pattern": "two_target_alt",
+    "description": "A designer engaged in debug_help with a two_target_alt gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p017",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p017",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p018",
+      "d_distract_p017",
+      "d_distract_p015"
+    ]
+  },
+  {
+    "scenario_id": "gta0026",
+    "role": "designer",
+    "info_need": "debug_help",
+    "gaze_pattern": "scan_zoom",
+    "description": "A designer engaged in debug_help with a scan_zoom gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p024",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p013",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p021",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p021",
+    "distractor_doc_ids": [
+      "d_distract_p008",
+      "d_distract_p024",
+      "d_distract_p013",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0027",
+    "role": "designer",
+    "info_need": "debug_help",
+    "gaze_pattern": "drift_return",
+    "description": "A designer engaged in debug_help with a drift_return gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p024",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p007",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p019",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p024",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p024",
+    "distractor_doc_ids": [
+      "d_distract_p007",
+      "d_distract_p019",
+      "d_distract_p005",
+      "d_distract_p023"
+    ]
+  },
+  {
+    "scenario_id": "gta0028",
+    "role": "designer",
+    "info_need": "design_ref",
+    "gaze_pattern": "single_fixation",
+    "description": "A designer engaged in design_ref with a single_fixation gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p015",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p015",
+    "distractor_doc_ids": [
+      "d_distract_p010",
+      "d_distract_p024",
+      "d_distract_p020",
+      "d_distract_p021"
+    ]
+  },
+  {
+    "scenario_id": "gta0029",
+    "role": "designer",
+    "info_need": "design_ref",
+    "gaze_pattern": "two_target_alt",
+    "description": "A designer engaged in design_ref with a two_target_alt gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p022",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p002",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p022",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p002",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p003",
+      "d_distract_p013",
+      "d_distract_p022"
+    ]
+  },
+  {
+    "scenario_id": "gta0030",
+    "role": "designer",
+    "info_need": "design_ref",
+    "gaze_pattern": "scan_zoom",
+    "description": "A designer engaged in design_ref with a scan_zoom gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p010",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p022",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p022",
+    "distractor_doc_ids": [
+      "d_distract_p002",
+      "d_distract_p000",
+      "d_distract_p010",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0031",
+    "role": "designer",
+    "info_need": "design_ref",
+    "gaze_pattern": "drift_return",
+    "description": "A designer engaged in design_ref with a drift_return gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p015",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p002",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p013",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p015",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p015",
+    "distractor_doc_ids": [
+      "d_distract_p002",
+      "d_distract_p013",
+      "d_distract_p023",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0032",
+    "role": "designer",
+    "info_need": "status_check",
+    "gaze_pattern": "single_fixation",
+    "description": "A designer engaged in status_check with a single_fixation gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p002",
+    "distractor_doc_ids": [
+      "d_distract_p015",
+      "d_distract_p020",
+      "d_distract_p004",
+      "d_distract_p011"
+    ]
+  },
+  {
+    "scenario_id": "gta0033",
+    "role": "designer",
+    "info_need": "status_check",
+    "gaze_pattern": "two_target_alt",
+    "description": "A designer engaged in status_check with a two_target_alt gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p023",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p024",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p023",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p019",
+      "d_distract_p010",
+      "d_distract_p014"
+    ]
+  },
+  {
+    "scenario_id": "gta0034",
+    "role": "designer",
+    "info_need": "status_check",
+    "gaze_pattern": "scan_zoom",
+    "description": "A designer engaged in status_check with a scan_zoom gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p012",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p017",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p008",
+      "d_distract_p011",
+      "d_distract_p012",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0035",
+    "role": "designer",
+    "info_need": "status_check",
+    "gaze_pattern": "drift_return",
+    "description": "A designer engaged in status_check with a drift_return gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p004",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p021",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p004",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p004",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p021",
+      "d_distract_p023",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0036",
+    "role": "designer",
+    "info_need": "onboarding",
+    "gaze_pattern": "single_fixation",
+    "description": "A designer engaged in onboarding with a single_fixation gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p008",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p013",
+      "d_distract_p009",
+      "d_distract_p011"
+    ]
+  },
+  {
+    "scenario_id": "gta0037",
+    "role": "designer",
+    "info_need": "onboarding",
+    "gaze_pattern": "two_target_alt",
+    "description": "A designer engaged in onboarding with a two_target_alt gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p017",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p008",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p017",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p008",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p012",
+      "d_distract_p017",
+      "d_distract_p010"
+    ]
+  },
+  {
+    "scenario_id": "gta0038",
+    "role": "designer",
+    "info_need": "onboarding",
+    "gaze_pattern": "scan_zoom",
+    "description": "A designer engaged in onboarding with a scan_zoom gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p005",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p006",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p021",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p016",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p016",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p006",
+      "d_distract_p021",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0039",
+    "role": "designer",
+    "info_need": "onboarding",
+    "gaze_pattern": "drift_return",
+    "description": "A designer engaged in onboarding with a drift_return gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p009",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p004",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p008",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p008",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p004",
+      "d_distract_p017",
+      "d_distract_p000"
+    ]
+  },
+  {
+    "scenario_id": "gta0040",
+    "role": "pm",
+    "info_need": "prior_art",
+    "gaze_pattern": "single_fixation",
+    "description": "A pm engaged in prior_art with a single_fixation gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p010",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p021",
+      "d_distract_p012",
+      "d_distract_p016",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0041",
+    "role": "pm",
+    "info_need": "prior_art",
+    "gaze_pattern": "two_target_alt",
+    "description": "A pm engaged in prior_art with a two_target_alt gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p022",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p004",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p022",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p004",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p022",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p013",
+      "d_distract_p014",
+      "d_distract_p004"
+    ]
+  },
+  {
+    "scenario_id": "gta0042",
+    "role": "pm",
+    "info_need": "prior_art",
+    "gaze_pattern": "scan_zoom",
+    "description": "A pm engaged in prior_art with a scan_zoom gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p014",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p001",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p007",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p014",
+      "d_distract_p001",
+      "d_distract_p011",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0043",
+    "role": "pm",
+    "info_need": "prior_art",
+    "gaze_pattern": "drift_return",
+    "description": "A pm engaged in prior_art with a drift_return gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p017",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p008",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p017",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p008",
+      "d_distract_p002",
+      "d_distract_p004"
+    ]
+  },
+  {
+    "scenario_id": "gta0044",
+    "role": "pm",
+    "info_need": "debug_help",
+    "gaze_pattern": "single_fixation",
+    "description": "A pm engaged in debug_help with a single_fixation gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p015",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p015",
+    "distractor_doc_ids": [
+      "d_distract_p008",
+      "d_distract_p016",
+      "d_distract_p023",
+      "d_distract_p022"
+    ]
+  },
+  {
+    "scenario_id": "gta0045",
+    "role": "pm",
+    "info_need": "debug_help",
+    "gaze_pattern": "two_target_alt",
+    "description": "A pm engaged in debug_help with a two_target_alt gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p010",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p010",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p024",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p005",
+      "d_distract_p009",
+      "d_distract_p000"
+    ]
+  },
+  {
+    "scenario_id": "gta0046",
+    "role": "pm",
+    "info_need": "debug_help",
+    "gaze_pattern": "scan_zoom",
+    "description": "A pm engaged in debug_help with a scan_zoom gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p021",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p023",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p009",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p009",
+    "distractor_doc_ids": [
+      "d_distract_p021",
+      "d_distract_p000",
+      "d_distract_p023",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0047",
+    "role": "pm",
+    "info_need": "debug_help",
+    "gaze_pattern": "drift_return",
+    "description": "A pm engaged in debug_help with a drift_return gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p014",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p000",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p017",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p014",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p014",
+    "distractor_doc_ids": [
+      "d_distract_p000",
+      "d_distract_p017",
+      "d_distract_p021",
+      "d_distract_p020"
+    ]
+  },
+  {
+    "scenario_id": "gta0048",
+    "role": "pm",
+    "info_need": "design_ref",
+    "gaze_pattern": "single_fixation",
+    "description": "A pm engaged in design_ref with a single_fixation gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p022",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p022",
+    "distractor_doc_ids": [
+      "d_distract_p007",
+      "d_distract_p019",
+      "d_distract_p002",
+      "d_distract_p018"
+    ]
+  },
+  {
+    "scenario_id": "gta0049",
+    "role": "pm",
+    "info_need": "design_ref",
+    "gaze_pattern": "two_target_alt",
+    "description": "A pm engaged in design_ref with a two_target_alt gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p000",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p009",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p000",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p009",
+    "distractor_doc_ids": [
+      "d_distract_p000",
+      "d_distract_p007",
+      "d_distract_p017",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0050",
+    "role": "pm",
+    "info_need": "design_ref",
+    "gaze_pattern": "scan_zoom",
+    "description": "A pm engaged in design_ref with a scan_zoom gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p020",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p009",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p013",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p014",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p014",
+    "distractor_doc_ids": [
+      "d_distract_p020",
+      "d_distract_p009",
+      "d_distract_p013",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0051",
+    "role": "pm",
+    "info_need": "design_ref",
+    "gaze_pattern": "drift_return",
+    "description": "A pm engaged in design_ref with a drift_return gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p019",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p018",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p017",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p019",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p019",
+    "distractor_doc_ids": [
+      "d_distract_p018",
+      "d_distract_p017",
+      "d_distract_p012",
+      "d_distract_p005"
+    ]
+  },
+  {
+    "scenario_id": "gta0052",
+    "role": "pm",
+    "info_need": "status_check",
+    "gaze_pattern": "single_fixation",
+    "description": "A pm engaged in status_check with a single_fixation gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p013",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p013",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p024",
+      "d_distract_p022",
+      "d_distract_p010"
+    ]
+  },
+  {
+    "scenario_id": "gta0053",
+    "role": "pm",
+    "info_need": "status_check",
+    "gaze_pattern": "two_target_alt",
+    "description": "A pm engaged in status_check with a two_target_alt gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p005",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p002",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p005",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p002",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p019",
+      "d_distract_p005",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0054",
+    "role": "pm",
+    "info_need": "status_check",
+    "gaze_pattern": "scan_zoom",
+    "description": "A pm engaged in status_check with a scan_zoom gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p008",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p022",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p004",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p004",
+    "distractor_doc_ids": [
+      "d_distract_p011",
+      "d_distract_p008",
+      "d_distract_p022",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0055",
+    "role": "pm",
+    "info_need": "status_check",
+    "gaze_pattern": "drift_return",
+    "description": "A pm engaged in status_check with a drift_return gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p015",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p013",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p002",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p015",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p015",
+    "distractor_doc_ids": [
+      "d_distract_p013",
+      "d_distract_p002",
+      "d_distract_p016",
+      "d_distract_p009"
+    ]
+  },
+  {
+    "scenario_id": "gta0056",
+    "role": "pm",
+    "info_need": "onboarding",
+    "gaze_pattern": "single_fixation",
+    "description": "A pm engaged in onboarding with a single_fixation gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p002",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p022",
+      "d_distract_p004",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0057",
+    "role": "pm",
+    "info_need": "onboarding",
+    "gaze_pattern": "two_target_alt",
+    "description": "A pm engaged in onboarding with a two_target_alt gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p007",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p010",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p007",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p010",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p012",
+      "d_distract_p010",
+      "d_distract_p017",
+      "d_distract_p019"
+    ]
+  },
+  {
+    "scenario_id": "gta0058",
+    "role": "pm",
+    "info_need": "onboarding",
+    "gaze_pattern": "scan_zoom",
+    "description": "A pm engaged in onboarding with a scan_zoom gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p012",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p023",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p002",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p017",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p012",
+      "d_distract_p023",
+      "d_distract_p002",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0059",
+    "role": "pm",
+    "info_need": "onboarding",
+    "gaze_pattern": "drift_return",
+    "description": "A pm engaged in onboarding with a drift_return gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p007",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p005",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p020",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p007",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p020",
+      "d_distract_p022",
+      "d_distract_p001"
+    ]
+  },
+  {
+    "scenario_id": "gta0060",
+    "role": "exec",
+    "info_need": "prior_art",
+    "gaze_pattern": "single_fixation",
+    "description": "A exec engaged in prior_art with a single_fixation gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p002",
+    "distractor_doc_ids": [
+      "d_distract_p011",
+      "d_distract_p004",
+      "d_distract_p020",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0061",
+    "role": "exec",
+    "info_need": "prior_art",
+    "gaze_pattern": "two_target_alt",
+    "description": "A exec engaged in prior_art with a two_target_alt gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p008",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p002",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p008",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p002",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p008",
+    "distractor_doc_ids": [
+      "d_distract_p011",
+      "d_distract_p010",
+      "d_distract_p003",
+      "d_distract_p000"
+    ]
+  },
+  {
+    "scenario_id": "gta0062",
+    "role": "exec",
+    "info_need": "prior_art",
+    "gaze_pattern": "scan_zoom",
+    "description": "A exec engaged in prior_art with a scan_zoom gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p014",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p002",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p006",
+      "d_distract_p014",
+      "d_distract_p002",
+      "d_distract_p015"
+    ]
+  },
+  {
+    "scenario_id": "gta0063",
+    "role": "exec",
+    "info_need": "prior_art",
+    "gaze_pattern": "drift_return",
+    "description": "A exec engaged in prior_art with a drift_return gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p013",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p004",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p021",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p013",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p013",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p021",
+      "d_distract_p008",
+      "d_distract_p023"
+    ]
+  },
+  {
+    "scenario_id": "gta0064",
+    "role": "exec",
+    "info_need": "debug_help",
+    "gaze_pattern": "single_fixation",
+    "description": "A exec engaged in debug_help with a single_fixation gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p016",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p016",
+    "distractor_doc_ids": [
+      "d_distract_p013",
+      "d_distract_p000",
+      "d_distract_p019",
+      "d_distract_p004"
+    ]
+  },
+  {
+    "scenario_id": "gta0065",
+    "role": "exec",
+    "info_need": "debug_help",
+    "gaze_pattern": "two_target_alt",
+    "description": "A exec engaged in debug_help with a two_target_alt gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p021",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p021",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p024",
+    "distractor_doc_ids": [
+      "d_distract_p021",
+      "d_distract_p003",
+      "d_distract_p012",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0066",
+    "role": "exec",
+    "info_need": "debug_help",
+    "gaze_pattern": "scan_zoom",
+    "description": "A exec engaged in debug_help with a scan_zoom gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p016",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p005",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p014",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p016",
+      "d_distract_p005",
+      "d_distract_p014",
+      "d_distract_p009"
+    ]
+  },
+  {
+    "scenario_id": "gta0067",
+    "role": "exec",
+    "info_need": "debug_help",
+    "gaze_pattern": "drift_return",
+    "description": "A exec engaged in debug_help with a drift_return gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p016",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p012",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p024",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p016",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p016",
+    "distractor_doc_ids": [
+      "d_distract_p012",
+      "d_distract_p024",
+      "d_distract_p022",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0068",
+    "role": "exec",
+    "info_need": "design_ref",
+    "gaze_pattern": "single_fixation",
+    "description": "A exec engaged in design_ref with a single_fixation gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p023",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p000",
+      "d_distract_p013",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0069",
+    "role": "exec",
+    "info_need": "design_ref",
+    "gaze_pattern": "two_target_alt",
+    "description": "A exec engaged in design_ref with a two_target_alt gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p020",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p004",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p020",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p004",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p020",
+    "distractor_doc_ids": [
+      "d_distract_p010",
+      "d_distract_p023",
+      "d_distract_p015",
+      "d_distract_p014"
+    ]
+  },
+  {
+    "scenario_id": "gta0070",
+    "role": "exec",
+    "info_need": "design_ref",
+    "gaze_pattern": "scan_zoom",
+    "description": "A exec engaged in design_ref with a scan_zoom gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p018",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p004",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p004",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p000",
+      "d_distract_p018",
+      "d_distract_p002"
+    ]
+  },
+  {
+    "scenario_id": "gta0071",
+    "role": "exec",
+    "info_need": "design_ref",
+    "gaze_pattern": "drift_return",
+    "description": "A exec engaged in design_ref with a drift_return gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p011",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p001",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p023",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p011",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p011",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p023",
+      "d_distract_p005",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0072",
+    "role": "exec",
+    "info_need": "status_check",
+    "gaze_pattern": "single_fixation",
+    "description": "A exec engaged in status_check with a single_fixation gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p009",
+    "distractor_doc_ids": [
+      "d_distract_p022",
+      "d_distract_p021",
+      "d_distract_p019",
+      "d_distract_p020"
+    ]
+  },
+  {
+    "scenario_id": "gta0073",
+    "role": "exec",
+    "info_need": "status_check",
+    "gaze_pattern": "two_target_alt",
+    "description": "A exec engaged in status_check with a two_target_alt gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p010",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p010",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p006",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p006",
+      "d_distract_p024",
+      "d_distract_p005",
+      "d_distract_p019"
+    ]
+  },
+  {
+    "scenario_id": "gta0074",
+    "role": "exec",
+    "info_need": "status_check",
+    "gaze_pattern": "scan_zoom",
+    "description": "A exec engaged in status_check with a scan_zoom gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p004",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p006",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p024",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p024",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p006",
+      "d_distract_p011",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0075",
+    "role": "exec",
+    "info_need": "status_check",
+    "gaze_pattern": "drift_return",
+    "description": "A exec engaged in status_check with a drift_return gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p007",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p013",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p003",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p007",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p013",
+      "d_distract_p003",
+      "d_distract_p001",
+      "d_distract_p010"
+    ]
+  },
+  {
+    "scenario_id": "gta0076",
+    "role": "exec",
+    "info_need": "onboarding",
+    "gaze_pattern": "single_fixation",
+    "description": "A exec engaged in onboarding with a single_fixation gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p023",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p022",
+      "d_distract_p017",
+      "d_distract_p006"
+    ]
+  },
+  {
+    "scenario_id": "gta0077",
+    "role": "exec",
+    "info_need": "onboarding",
+    "gaze_pattern": "two_target_alt",
+    "description": "A exec engaged in onboarding with a two_target_alt gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p001",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p012",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p001",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p012",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p001",
+    "distractor_doc_ids": [
+      "d_distract_p008",
+      "d_distract_p014",
+      "d_distract_p023",
+      "d_distract_p012"
+    ]
+  },
+  {
+    "scenario_id": "gta0078",
+    "role": "exec",
+    "info_need": "onboarding",
+    "gaze_pattern": "scan_zoom",
+    "description": "A exec engaged in onboarding with a scan_zoom gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p003",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p007",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p010",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p000",
+      "d_distract_p003",
+      "d_distract_p007",
+      "d_distract_p011"
+    ]
+  },
+  {
+    "scenario_id": "gta0079",
+    "role": "exec",
+    "info_need": "onboarding",
+    "gaze_pattern": "drift_return",
+    "description": "A exec engaged in onboarding with a drift_return gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p005",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p019",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p010",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p005",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p005",
+    "distractor_doc_ids": [
+      "d_distract_p019",
+      "d_distract_p010",
+      "d_distract_p013",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0080",
+    "role": "intern",
+    "info_need": "prior_art",
+    "gaze_pattern": "single_fixation",
+    "description": "A intern engaged in prior_art with a single_fixation gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p007",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p006",
+      "d_distract_p018",
+      "d_distract_p000",
+      "d_distract_p016"
+    ]
+  },
+  {
+    "scenario_id": "gta0081",
+    "role": "intern",
+    "info_need": "prior_art",
+    "gaze_pattern": "two_target_alt",
+    "description": "A intern engaged in prior_art with a two_target_alt gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p023",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p024",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p023",
+    "distractor_doc_ids": [
+      "d_distract_p024",
+      "d_distract_p020",
+      "d_distract_p010",
+      "d_distract_p021"
+    ]
+  },
+  {
+    "scenario_id": "gta0082",
+    "role": "intern",
+    "info_need": "prior_art",
+    "gaze_pattern": "scan_zoom",
+    "description": "A intern engaged in prior_art with a scan_zoom gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p012",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p006",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p007",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p021",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p021",
+    "distractor_doc_ids": [
+      "d_distract_p012",
+      "d_distract_p006",
+      "d_distract_p007",
+      "d_distract_p004"
+    ]
+  },
+  {
+    "scenario_id": "gta0083",
+    "role": "intern",
+    "info_need": "prior_art",
+    "gaze_pattern": "drift_return",
+    "description": "A intern engaged in prior_art with a drift_return gaze pattern, requiring documents about previous research.",
+    "query_text": "find the previous research relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p011",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p023",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p005",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p011",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p011",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p005",
+      "d_distract_p010",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0084",
+    "role": "intern",
+    "info_need": "debug_help",
+    "gaze_pattern": "single_fixation",
+    "description": "A intern engaged in debug_help with a single_fixation gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p004",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p004",
+    "distractor_doc_ids": [
+      "d_distract_p015",
+      "d_distract_p024",
+      "d_distract_p007",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0085",
+    "role": "intern",
+    "info_need": "debug_help",
+    "gaze_pattern": "two_target_alt",
+    "description": "A intern engaged in debug_help with a two_target_alt gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p004",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p019",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p004",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p019",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p004",
+    "distractor_doc_ids": [
+      "d_distract_p001",
+      "d_distract_p015",
+      "d_distract_p003",
+      "d_distract_p022"
+    ]
+  },
+  {
+    "scenario_id": "gta0086",
+    "role": "intern",
+    "info_need": "debug_help",
+    "gaze_pattern": "scan_zoom",
+    "description": "A intern engaged in debug_help with a scan_zoom gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p002",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p024",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p013",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p013",
+    "distractor_doc_ids": [
+      "d_distract_p002",
+      "d_distract_p024",
+      "d_distract_p011",
+      "d_distract_p014"
+    ]
+  },
+  {
+    "scenario_id": "gta0087",
+    "role": "intern",
+    "info_need": "debug_help",
+    "gaze_pattern": "drift_return",
+    "description": "A intern engaged in debug_help with a drift_return gaze pattern, requiring documents about error trace.",
+    "query_text": "find the error trace relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p010",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p015",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p017",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p010",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p015",
+      "d_distract_p017",
+      "d_distract_p021",
+      "d_distract_p008"
+    ]
+  },
+  {
+    "scenario_id": "gta0088",
+    "role": "intern",
+    "info_need": "design_ref",
+    "gaze_pattern": "single_fixation",
+    "description": "A intern engaged in design_ref with a single_fixation gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p007",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p007",
+    "distractor_doc_ids": [
+      "d_distract_p022",
+      "d_distract_p003",
+      "d_distract_p012",
+      "d_distract_p002"
+    ]
+  },
+  {
+    "scenario_id": "gta0089",
+    "role": "intern",
+    "info_need": "design_ref",
+    "gaze_pattern": "two_target_alt",
+    "description": "A intern engaged in design_ref with a two_target_alt gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p007",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p009",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p007",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p009",
+    "distractor_doc_ids": [
+      "d_distract_p007",
+      "d_distract_p015",
+      "d_distract_p017",
+      "d_distract_p001"
+    ]
+  },
+  {
+    "scenario_id": "gta0090",
+    "role": "intern",
+    "info_need": "design_ref",
+    "gaze_pattern": "scan_zoom",
+    "description": "A intern engaged in design_ref with a scan_zoom gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p001",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p011",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p012",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p012",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p001",
+      "d_distract_p011",
+      "d_distract_p007"
+    ]
+  },
+  {
+    "scenario_id": "gta0091",
+    "role": "intern",
+    "info_need": "design_ref",
+    "gaze_pattern": "drift_return",
+    "description": "A intern engaged in design_ref with a drift_return gaze pattern, requiring documents about design spec.",
+    "query_text": "find the design spec relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p015",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p023",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p001",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p015",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p015",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p001",
+      "d_distract_p000",
+      "d_distract_p003"
+    ]
+  },
+  {
+    "scenario_id": "gta0092",
+    "role": "intern",
+    "info_need": "status_check",
+    "gaze_pattern": "single_fixation",
+    "description": "A intern engaged in status_check with a single_fixation gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p010",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p010",
+    "distractor_doc_ids": [
+      "d_distract_p004",
+      "d_distract_p023",
+      "d_distract_p015",
+      "d_distract_p024"
+    ]
+  },
+  {
+    "scenario_id": "gta0093",
+    "role": "intern",
+    "info_need": "status_check",
+    "gaze_pattern": "two_target_alt",
+    "description": "A intern engaged in status_check with a two_target_alt gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p018",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p006",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p018",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p006",
+    "distractor_doc_ids": [
+      "d_distract_p005",
+      "d_distract_p022",
+      "d_distract_p001",
+      "d_distract_p018"
+    ]
+  },
+  {
+    "scenario_id": "gta0094",
+    "role": "intern",
+    "info_need": "status_check",
+    "gaze_pattern": "scan_zoom",
+    "description": "A intern engaged in status_check with a scan_zoom gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p023",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p000",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p001",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p017",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p017",
+    "distractor_doc_ids": [
+      "d_distract_p023",
+      "d_distract_p000",
+      "d_distract_p001",
+      "d_distract_p014"
+    ]
+  },
+  {
+    "scenario_id": "gta0095",
+    "role": "intern",
+    "info_need": "status_check",
+    "gaze_pattern": "drift_return",
+    "description": "A intern engaged in status_check with a drift_return gaze pattern, requiring documents about weekly status.",
+    "query_text": "find the weekly status relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p018",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p006",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p008",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p018",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p018",
+    "distractor_doc_ids": [
+      "d_distract_p006",
+      "d_distract_p008",
+      "d_distract_p000",
+      "d_distract_p021"
+    ]
+  },
+  {
+    "scenario_id": "gta0096",
+    "role": "intern",
+    "info_need": "onboarding",
+    "gaze_pattern": "single_fixation",
+    "description": "A intern engaged in onboarding with a single_fixation gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p019",
+        "dur_ms": 2000
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p019",
+    "distractor_doc_ids": [
+      "d_distract_p008",
+      "d_distract_p010",
+      "d_distract_p012",
+      "d_distract_p013"
+    ]
+  },
+  {
+    "scenario_id": "gta0097",
+    "role": "intern",
+    "info_need": "onboarding",
+    "gaze_pattern": "two_target_alt",
+    "description": "A intern engaged in onboarding with a two_target_alt gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 500,
+        "target": "p015",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1000,
+        "target": "p024",
+        "dur_ms": 400
+      },
+      {
+        "t_ms": 1500,
+        "target": "p015",
+        "dur_ms": 400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p024",
+    "distractor_doc_ids": [
+      "d_distract_p003",
+      "d_distract_p021",
+      "d_distract_p016",
+      "d_distract_p015"
+    ]
+  },
+  {
+    "scenario_id": "gta0098",
+    "role": "intern",
+    "info_need": "onboarding",
+    "gaze_pattern": "scan_zoom",
+    "description": "A intern engaged in onboarding with a scan_zoom gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p009",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 200,
+        "target": "p022",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 400,
+        "target": "p012",
+        "dur_ms": 180
+      },
+      {
+        "t_ms": 600,
+        "target": "p020",
+        "dur_ms": 1400
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p020",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p022",
+      "d_distract_p012",
+      "d_distract_p001"
+    ]
+  },
+  {
+    "scenario_id": "gta0099",
+    "role": "intern",
+    "info_need": "onboarding",
+    "gaze_pattern": "drift_return",
+    "description": "A intern engaged in onboarding with a drift_return gaze pattern, requiring documents about newcomer guide.",
+    "query_text": "find the newcomer guide relevant to my current work",
+    "gaze_trajectory": [
+      {
+        "t_ms": 0,
+        "target": "p013",
+        "dur_ms": 600
+      },
+      {
+        "t_ms": 600,
+        "target": "p009",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 900,
+        "target": "p019",
+        "dur_ms": 250
+      },
+      {
+        "t_ms": 1200,
+        "target": "p013",
+        "dur_ms": 800
+      }
+    ],
+    "ground_truth_doc_id": "d_target_p013",
+    "distractor_doc_ids": [
+      "d_distract_p009",
+      "d_distract_p019",
+      "d_distract_p001",
+      "d_distract_p021"
+    ]
+  }
+]
