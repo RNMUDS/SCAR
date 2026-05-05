@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.log
+data/results/*.json
+data/results/*.parquet
+data/figures/*.pdf
+data/figures/*.png
+data/corpora/raw/
+logs/
+.ipynb_checkpoints/
+paper_v1/
+reference/

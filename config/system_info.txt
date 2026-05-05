@@ -1,0 +1,25 @@
+=== system_info.txt ===
+Linux spark-0068 6.14.0-1013-nvidia #13-Ubuntu SMP PREEMPT_DYNAMIC Wed Oct 29 06:01:19 UTC 2025 aarch64 aarch64 aarch64 GNU/Linux
+
+Tue May  5 16:52:09 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GB10                    On  |   0000000F:01:00.0 Off |                  N/A |
+| N/A   41C    P0             10W /  N/A  | Not Supported          |      0%      Default |
+
+MemTotal:       125487532 kB
+MemFree:        37486512 kB
+MemAvailable:   81139152 kB
+Buffers:          120060 kB
+Cached:         40859828 kB
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  3.7T  1.2T  2.4T  34% /
+
+Python 3.12.3
+python3.12

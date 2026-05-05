@@ -1,0 +1,35 @@
+# Canonical RNG seeds for SCAR brushup re-experiments
+# Used by all experiments to ensure reproducibility.
+
+main_seed: 42
+variance_seeds: [42, 137, 271, 314, 1729]   # 5-seed runs for variance estimates
+
+linucb:
+  alpha_grid: [0.5, 1.0, 2.0]
+  warm_start_n: 20
+
+gta:
+  num_scenarios: 200
+  diversity_dims:
+    roles: [engineer, designer, pm, exec, intern]
+    info_needs: [prior_art, debug_help, design_ref, status_check, onboarding]
+    gaze_patterns: [single_fixation, two_target_alt, scan_zoom, drift_return]
+
+grid:
+  lhs_points: 81
+  simplex_dim: 5
+
+noise:
+  sigma_levels: [0.0, 0.1, 0.2, 0.3, 0.5]
+  inject_targets: [proximity, gaze]
+
+corpus:
+  github_repo: "kubernetes/kubernetes"
+  fallback_repo: "vercel/next.js"
+  target_docs: 2000
+  target_queries: 200
+
+llm:
+  embedding_model: "nomic-embed-text:latest"
+  generator_model: "qwen3.5:latest"
+  judge_model: "gpt-oss:120b"
