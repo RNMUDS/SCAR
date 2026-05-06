@@ -55,7 +55,8 @@ SCAR/
 │   ├── 03_grid81/                ← weight grid search
 │   ├── 04_noise_sweep/           ← noise sensitivity
 │   ├── 05_real_corpus/           ← real corpus probe
-│   └── 06_proximity_sweep/       ← proximity-only β sweep
+│   ├── 06_proximity_sweep/       ← proximity-only β sweep
+│   └── 07_dense_baseline/        ← BM25 vs Dense × {no spatial, +SCAR}
 ├── config/                       ← reproducibility configs
 │   └── seeds.yaml                ← canonical RNG seeds
 ├── data/
