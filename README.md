@@ -56,12 +56,6 @@ SCAR/
 │   ├── 04_noise_sweep/           ← noise sensitivity
 │   ├── 05_real_corpus/           ← real corpus probe
 │   └── 06_proximity_sweep/       ← proximity-only β sweep
-├── scripts/                      ← figure-generation scripts
-│   ├── gen_fig14_linucb.py
-│   ├── gen_fig16_noise.py
-│   ├── gen_fig17_real_corpus.py
-│   └── gen_fig18_proximity_sweep.py
-├── tests/                        ← pytest tests for src/
 ├── config/                       ← reproducibility configs
 │   └── seeds.yaml                ← canonical RNG seeds
 ├── data/
@@ -106,17 +100,6 @@ python -m experiments.06_proximity_sweep.run \
 All experiments write JSON results to `data/results/<exp_id>.json` and use
 seeds from `config/seeds.yaml` for reproducibility.
 
-## Reproducing the Figures
-
-The figure-generation scripts in `scripts/` read from `data/results/` and
-write PDF/PNG files to a local `data/figures/` directory (gitignored).
-Example:
-
-```bash
-python scripts/gen_fig18_proximity_sweep.py
-# writes data/figures/fig18_proximity_sweep.{pdf,png}
-```
-
 ## Local LLM Stack
 
 The simulator and scoring pipeline use Ollama-served local models:
@@ -145,4 +128,5 @@ content of any related manuscript.
 
 ## License
 
-License terms will be added prior to public release.
+This project is released under the [MIT License](LICENSE) — copyright (c) 2026
+Ryota Nakamura.
