@@ -1,67 +1,148 @@
-# SCAR Brushup Workspace (DGX Spark)
+# SCAR: Spatial Context-Aware Retrieval in Virtual Office Environments
 
-**Host**: `muds-spark@202.240.109.50` (NVIDIA GB10, CUDA 13.0, 119GB RAM, Ubuntu 24)
-**Mirror of paper**: `~/SCAR/paper_v1/` (synced from local Mac, frozen tag `v1.0-pre-brushup`)
-**Reference**: `~/SCAR/reference/prima/` (PRIMA repo subset for LinUCB / experiment design)
+This repository contains the simulator, experiment scripts, and result data
+for **SCAR**, a platform-agnostic re-ranking framework that fuses four
+spatial signals (proximity, gaze direction, location type, temporal decay)
+with text similarity in virtual-office information retrieval.
 
-## Layout
+> The accompanying manuscript (under preparation) is not included in this
+> repository. The simulator code and experimental data here are provided to
+> support reproducibility.
+
+---
+
+## The Virtual-Office Simulator
+
+SCAR is evaluated within a custom virtual-office simulator built with
+Three.js. The environment contains six zones (open office, meeting rooms
+A/B, focus booth, lounge, entrance), ten AI-driven agents, and multiple
+gaze-target objects (task board, bulletin board, performance dashboard,
+organisational chart).
+
+### Bird's-eye view
+
+![Bird's-eye view of the virtual office](docs/images/virtual_office1.png)
+
+Six zones separated by walls with doorways. Wall-mounted gaze-target
+objects feed the GazeBonus signal in the SCAR scoring function.
+
+### First-person view
+
+![First-person view from the open office](docs/images/virtual_office2.png)
+
+Red arrow: an agent's gaze directed toward a colleague.
+Blue circle: that colleague's proximity radius. Wall objects (task board,
+performance dashboard) are potential gaze targets.
+
+---
+
+## Repository Layout
 
 ```
-~/SCAR/
-├── README.md                    ← this file
-├── paper_v1/                    ← frozen v1.0 SCAR paper (read-only reference)
-├── reference/
-│   └── prima/                   ← PRIMA reference (papers/, src/, 06_reviewer_response/)
-├── src/
-│   ├── baseline/                ← LinUCB and other adaptive baselines (Python)
-│   ├── gta/                     ← Gaze Trajectory Attention scenario generator
-│   ├── grid/                    ← weight grid search (LHS over 5D)
-│   ├── noise/                   ← noise injection module
-│   ├── corpus/                  ← real corpus (GitHub Discussions) ingestion
-│   ├── sim/                     ← virtual office simulator (port from paper_v1)
-│   └── utils/                   ← shared (RNG, metrics, IO, eval)
-├── experiments/
-│   ├── 01_linucb/               ← Phase 1.1 + 2.1
-│   ├── 02_gta_n100/             ← Phase 1.2 + 2.2
-│   ├── 03_grid81/               ← Phase 1.3 + 2.3
-│   ├── 04_noise_sweep/          ← Phase 1.4 + 2.4
-│   ├── 05_real_corpus/          ← Phase 1.5 + 2.5
-│   └── 06_bias_verification/    ← Phase 2.6
+SCAR/
+├── README.md                     ← this file
+├── src/                          ← method implementations
+│   ├── sim/                      ← virtual-office simulator + scorer
+│   ├── baseline/                 ← LinUCB and other adaptive baselines
+│   ├── gta/                      ← gaze-trajectory utilities
+│   ├── grid/                     ← weight-tuning grid search
+│   ├── noise/                    ← noise-injection module
+│   ├── corpus/                   ← corpus ingestion (synthetic + real)
+│   └── utils/                    ← shared utilities (RNG, metrics, stats)
+├── experiments/                  ← phase runners
+│   ├── 01_linucb/                ← LinUCB baseline
+│   ├── 02_gta_n100/              ← gaze-method comparison
+│   ├── 03_grid81/                ← weight grid search
+│   ├── 04_noise_sweep/           ← noise sensitivity
+│   ├── 05_real_corpus/           ← real corpus probe
+│   └── 06_proximity_sweep/       ← proximity-only β sweep
+├── scripts/                      ← figure-generation scripts
+│   ├── gen_fig14_linucb.py
+│   ├── gen_fig16_noise.py
+│   ├── gen_fig17_real_corpus.py
+│   └── gen_fig18_proximity_sweep.py
+├── tests/                        ← pytest tests for src/
+├── config/                       ← reproducibility configs
+│   └── seeds.yaml                ← canonical RNG seeds
 ├── data/
-│   ├── corpora/                 ← generated and real corpora
-│   ├── results/                 ← all experiment JSON outputs
-│   └── figures/                 ← regenerated and new figures (PNG/PDF)
-├── scripts/                     ← driver scripts (run_all, sync, build)
-├── logs/                        ← stdout/stderr from runs
-├── notebooks/                   ← exploratory analysis (.ipynb)
-├── tests/                       ← pytest tests for src/
-└── config/
-    ├── system_info.txt          ← captured at Phase 0
-    └── seeds.yaml               ← canonical RNG seeds for reproducibility
+│   └── results/                  ← experiment JSON outputs
+└── docs/
+    └── images/                   ← screenshots used in this README
 ```
 
-## How to run
+## Method Summary
+
+SCAR inserts a lightweight re-ranking step between the embedding-based
+retrieval stage and the LLM generation stage of a standard RAG pipeline.
+Given query `q`, document `d`, and spatial context `C`, the SCAR score is:
+
+```
+S(q, d, C) = α · TextSim(q, d)
+           + β · ProxBonus(d, C)
+           + γ · GazeBonus(d, C)
+           + δ · LocBonus(d, C)
+           + ε · TimeDecay(d, C)
+```
+
+with default weights `(0.50, 0.20, 0.15, 0.10, 0.05)` selected by simplex
+grid search on a held-out validation set.
+
+## How to Run
 
 ```bash
-cd ~/SCAR
-source .venv/bin/activate
-python -m experiments.01_linucb.run --seed 42 --config config/linucb_default.yaml
+git clone https://github.com/RNMUDS/SCAR.git
+cd SCAR
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt        # if/when added
+
+# Example: run the LinUCB baseline phase
+python -m experiments.01_linucb.run --seed 42
+
+# Run the proximity-only β sweep (synthetic + GitHub real corpus)
+python -m experiments.06_proximity_sweep.run \
+    --betas "0.05,0.10,0.15,0.20,0.25,0.30,0.40,0.50"
 ```
 
-All experiments write to `data/results/<exp_id>_<timestamp>.json` and figures to `data/figures/`.
+All experiments write JSON results to `data/results/<exp_id>.json` and use
+seeds from `config/seeds.yaml` for reproducibility.
 
-## Sync back to local Mac
+## Reproducing the Figures
+
+The figure-generation scripts in `scripts/` read from `data/results/` and
+write PDF/PNG files to a local `data/figures/` directory (gitignored).
+Example:
 
 ```bash
-# from local Mac
-rsync -az --exclude='.venv' --exclude='reference' --exclude='paper_v1' \
-  muds-spark@202.240.109.50:~/SCAR/ /Users/rn/Documents/Company/docs/research/scar_brushup/
+python scripts/gen_fig18_proximity_sweep.py
+# writes data/figures/fig18_proximity_sweep.{pdf,png}
 ```
 
-Paper compilation stays on local Mac (DGX Spark has no LaTeX; we keep paper.tex authored locally and only ship figures/result tables back).
+## Local LLM Stack
 
-## Plan reference
+The simulator and scoring pipeline use Ollama-served local models:
 
-Full plan: local Mac at `/Users/rn/Documents/Company/tasks/scar_brushup_plan.md`
+| Role | Model | Note |
+|---|---|---|
+| Query/document embedding | `nomic-embed-text` v1.5 | 768-dim, ~137M params |
+| Answer generation | `mistral` 7B (Q4_K_M) | Quantised for CPU |
+| LLM-driven user simulation | `mistral` 7B | Drives agent action selection |
 
-Phase status: **Phase 0 in progress**.
+No external API calls are made; the system is designed for BYOC
+(Bring Your Own Cloud) deployment.
+
+## Citation
+
+A manuscript reporting the SCAR simulation feasibility study is in
+preparation. Citation details will be added here upon publication.
+
+## Acknowledgments
+
+The simulator, experiment scripts, and figure-generation code were
+developed with the assistance of Claude (Anthropic) and Claude Code.
+Local LLM inference was performed via Ollama. The author retained final
+responsibility for all experimental design, statistical analysis, and the
+content of any related manuscript.
+
+## License
+
+License terms will be added prior to public release.
