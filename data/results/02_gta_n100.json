@@ -1,0 +1,34 @@
+{
+  "config": {
+    "n": 100,
+    "seed": 42,
+    "use_ollama": false,
+    "model": "qwen3.5:latest",
+    "out": "data/results/02_gta_n100.json",
+    "scenarios_out": "data/corpora/gta_scenarios.json"
+  },
+  "elapsed_seconds": 0.0076787471771240234,
+  "n_scenarios": 100,
+  "summary": {
+    "random": {
+      "mean_ndcg5": 0.6203672581785056,
+      "std_ndcg5": 0.22254719688920047,
+      "n": 100
+    },
+    "current_gaze_only": {
+      "mean_ndcg5": 0.9224952482500061,
+      "std_ndcg5": 0.15032535143456366,
+      "n": 100
+    },
+    "frequency_only": {
+      "mean_ndcg5": 0.7801643877683543,
+      "std_ndcg5": 0.24760714207041856,
+      "n": 100
+    },
+    "gta": {
+      "mean_ndcg5": 0.9224952482500061,
+      "std_ndcg5": 0.15032535143456366,
+      "n": 100
+    }
+  }
+}

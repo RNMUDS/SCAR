@@ -1,0 +1,115 @@
+{
+  "config": {
+    "seed": 42,
+    "n_docs": 200,
+    "n_queries": 120,
+    "sigmas": "0.0,0.1,0.2,0.3,0.5",
+    "out": "data/results/04_noise_sweep.json"
+  },
+  "sigmas": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.5
+  ],
+  "results": {
+    "bm25": [
+      {
+        "sigma": 0.0,
+        "mean_ndcg5": 0.8132702094908004,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.1,
+        "mean_ndcg5": 0.8132702094908004,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.2,
+        "mean_ndcg5": 0.8132702094908004,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.3,
+        "mean_ndcg5": 0.8132702094908004,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.5,
+        "mean_ndcg5": 0.8132702094908004,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      }
+    ],
+    "scar-full": [
+      {
+        "sigma": 0.0,
+        "mean_ndcg5": 1.0,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.1,
+        "mean_ndcg5": 0.9599600861296104,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.2,
+        "mean_ndcg5": 0.9108527524690828,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.3,
+        "mean_ndcg5": 0.9011062032282336,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.5,
+        "mean_ndcg5": 0.8324394128167574,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      }
+    ],
+    "linucb-base": [
+      {
+        "sigma": 0.0,
+        "mean_ndcg5": 0.9140589229893296,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.1,
+        "mean_ndcg5": 0.8853386138077991,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.2,
+        "mean_ndcg5": 0.8592371353245163,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.3,
+        "mean_ndcg5": 0.8544123631683059,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      },
+      {
+        "sigma": 0.5,
+        "mean_ndcg5": 0.818250334296203,
+        "mean_mrr": 1.0,
+        "mean_recall5": 0.2796947706213547
+      }
+    ]
+  },
+  "elapsed_seconds": 0.6868579387664795
+}

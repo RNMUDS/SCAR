@@ -1,0 +1,117 @@
+{
+  "config": {
+    "seed": 42,
+    "n_persons": 40,
+    "n_docs": 200,
+    "n_queries": 120,
+    "alpha": 1.0
+  },
+  "elapsed_seconds": 0.3981165885925293,
+  "results": {
+    "bm25": {
+      "label": "bm25",
+      "mean_ndcg5": 0.8132702094908004,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25": 120
+      },
+      "n_queries": 120
+    },
+    "bm25+prox": {
+      "label": "bm25+prox",
+      "mean_ndcg5": 0.9977139289402966,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25+prox": 120
+      },
+      "n_queries": 120
+    },
+    "bm25+gaze": {
+      "label": "bm25+gaze",
+      "mean_ndcg5": 0.8571272283253284,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25+gaze": 120
+      },
+      "n_queries": 120
+    },
+    "bm25+loc": {
+      "label": "bm25+loc",
+      "mean_ndcg5": 0.8132702094908004,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25+loc": 120
+      },
+      "n_queries": 120
+    },
+    "bm25+time": {
+      "label": "bm25+time",
+      "mean_ndcg5": 0.8207643697844274,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25+time": 120
+      },
+      "n_queries": 120
+    },
+    "scar-full": {
+      "label": "scar-full",
+      "mean_ndcg5": 1.0,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "scar-full": 120
+      },
+      "n_queries": 120
+    },
+    "linucb-base": {
+      "label": "linucb-base",
+      "mean_ndcg5": 0.9140589229893296,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25": 16,
+        "bm25+time": 16,
+        "bm25+loc": 14,
+        "bm25+gaze": 18,
+        "bm25+prox": 28,
+        "scar-full": 28
+      },
+      "n_queries": 120
+    },
+    "linucb-warm": {
+      "label": "linucb-warm",
+      "mean_ndcg5": 0.9090697804139548,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "bm25": 17,
+        "bm25+time": 18,
+        "bm25+loc": 15,
+        "bm25+gaze": 19,
+        "bm25+prox": 24,
+        "scar-full": 27
+      },
+      "n_queries": 120
+    },
+    "scar+linucb": {
+      "label": "scar+linucb",
+      "mean_ndcg5": 0.9106291660482381,
+      "mean_mrr": 1.0,
+      "mean_recall5": 0.2796947706213547,
+      "arm_pull_counts": {
+        "scar-full": 26,
+        "bm25": 19,
+        "bm25+time": 16,
+        "bm25+gaze": 16,
+        "bm25+prox": 27,
+        "bm25+loc": 16
+      },
+      "n_queries": 120
+    }
+  }
+}

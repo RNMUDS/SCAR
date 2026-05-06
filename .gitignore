@@ -2,12 +2,19 @@
 __pycache__/
 *.pyc
 *.log
-data/results/*.json
-data/results/*.parquet
-data/figures/*.pdf
-data/figures/*.png
 data/corpora/raw/
 logs/
 .ipynb_checkpoints/
+
+# Old versions / external references — large and not needed in repo
 paper_v1/
 reference/
+
+# Manuscript files — managed separately, not in the public-data repo
+paper_ieee/
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz

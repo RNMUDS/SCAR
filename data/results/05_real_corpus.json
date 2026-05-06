@@ -1,0 +1,87 @@
+{
+  "config": {
+    "owner": "vercel",
+    "repo": "next.js",
+    "max_pages": 4,
+    "seed": 42,
+    "alpha": 1.0,
+    "out": "data/results/05_real_corpus.json",
+    "corpus_out": "data/corpora/github_real.json"
+  },
+  "status": "ok",
+  "n_docs": 200,
+  "n_queries": 200,
+  "n_qrels": 246,
+  "results": {
+    "bm25": {
+      "mean_ndcg5": 0.9792487558285905,
+      "mean_mrr": 0.99,
+      "mean_recall5": 0.978047619047619
+    },
+    "bm25+prox": {
+      "mean_ndcg5": 0.9830601035163405,
+      "mean_mrr": 0.99,
+      "mean_recall5": 0.9803571428571429
+    },
+    "bm25+gaze": {
+      "mean_ndcg5": 0.9801989902453804,
+      "mean_mrr": 0.99,
+      "mean_recall5": 0.980547619047619
+    },
+    "bm25+loc": {
+      "mean_ndcg5": 0.9792487558285905,
+      "mean_mrr": 0.99,
+      "mean_recall5": 0.978047619047619
+    },
+    "bm25+time": {
+      "mean_ndcg5": 0.976747379208886,
+      "mean_mrr": 0.9875,
+      "mean_recall5": 0.9776904761904762
+    },
+    "scar-full": {
+      "mean_ndcg5": 0.9739000812749032,
+      "mean_mrr": 0.98,
+      "mean_recall5": 0.9775238095238096
+    },
+    "linucb-base": {
+      "mean_ndcg5": 0.979403411212825,
+      "mean_mrr": 0.9875,
+      "mean_recall5": 0.9793809523809525,
+      "arm_pull_counts": {
+        "bm25": 35,
+        "bm25+time": 36,
+        "bm25+loc": 34,
+        "bm25+gaze": 38,
+        "bm25+prox": 27,
+        "scar-full": 30
+      }
+    },
+    "linucb-warm": {
+      "mean_ndcg5": 0.9780254198232395,
+      "mean_mrr": 0.985,
+      "mean_recall5": 0.9793809523809525,
+      "arm_pull_counts": {
+        "bm25": 33,
+        "bm25+time": 38,
+        "bm25+loc": 35,
+        "bm25+gaze": 37,
+        "bm25+prox": 27,
+        "scar-full": 30
+      }
+    },
+    "scar+linucb": {
+      "mean_ndcg5": 0.9794034112128251,
+      "mean_mrr": 0.9875,
+      "mean_recall5": 0.9793809523809525,
+      "arm_pull_counts": {
+        "scar-full": 44,
+        "bm25": 40,
+        "bm25+time": 32,
+        "bm25+gaze": 29,
+        "bm25+prox": 30,
+        "bm25+loc": 25
+      }
+    }
+  },
+  "elapsed_seconds": 12.67166519165039
+}

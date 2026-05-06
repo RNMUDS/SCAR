@@ -22,7 +22,6 @@ def main():
     style = {
         "bm25":        ("o", "#9E9E9E", "BM25 (text only)"),
         "scar-full":   ("s", "#76B900", "SCAR (fixed weights)"),
-        "linucb-base": ("D", "#1E88E5", "LinUCB (online)"),
     }
     for method, (marker, color, label) in style.items():
         if method not in results:
@@ -39,7 +38,7 @@ def main():
     ax.set_xticks(sigmas)
     ax.set_xticklabels([f"{s:.1f}" for s in sigmas])
     ax.grid(alpha=0.3)
-    ax.legend(loc="lower left", fontsize=8)
+    ax.legend(loc="upper right", fontsize=8)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
