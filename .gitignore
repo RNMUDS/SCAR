@@ -7,8 +7,9 @@ logs/
 .ipynb_checkpoints/
 
 # Old versions / external references — large and not needed in repo
-paper_v1/
+figures_src/
 reference/
+archive/
 
 # Manuscript files — managed separately, not in this code repo
 paper_ieee/
