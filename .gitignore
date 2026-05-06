@@ -10,11 +10,16 @@ logs/
 paper_v1/
 reference/
 
-# Manuscript files — managed separately, not in the public-data repo
+# Manuscript files — managed separately, not in this code repo
 paper_ieee/
+paper_v*.tex
+paper_v*.pdf
 *.aux
 *.bbl
 *.blg
 *.out
 *.toc
 *.synctex.gz
+
+# Generated figures — produced from scripts/, do not commit binary outputs
+data/figures/
