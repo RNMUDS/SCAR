@@ -44,14 +44,12 @@ SCAR/
 ├── src/                          ← method implementations
 │   ├── sim/                      ← virtual-office simulator + scorer
 │   ├── baseline/                 ← LinUCB and other adaptive baselines
-│   ├── gta/                      ← gaze-trajectory utilities
 │   ├── grid/                     ← weight-tuning grid search
 │   ├── noise/                    ← noise-injection module
 │   ├── corpus/                   ← corpus ingestion (synthetic + real)
 │   └── utils/                    ← shared utilities (RNG, metrics, stats)
 ├── experiments/                  ← phase runners
 │   ├── 01_linucb/                ← LinUCB baseline
-│   ├── 02_gta_n100/              ← gaze-method comparison
 │   ├── 03_grid81/                ← weight grid search
 │   ├── 04_noise_sweep/           ← noise sensitivity
 │   ├── 05_real_corpus/           ← real corpus probe
